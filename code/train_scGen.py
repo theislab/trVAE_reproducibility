@@ -66,7 +66,7 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
                                       condition_key=condition_key,
                                       celltype_to_predict=cell_type)
 
-        pred_adata = anndata.AnnData(pred, obs={condition_key: [f"{cell_type}_pred_stim"] * len(pred),
+        pred_adata = anndata.AnnData(pred, obs={condition_key: [f"{cell_type}_pred_{stim_key}"] * len(pred),
                                                 cell_type_key: [cell_type] * len(pred)},
                                      var={"var_names": cell_type_data.var_names})
         ctrl_adata = anndata.AnnData(cell_type_ctrl_data.X,
