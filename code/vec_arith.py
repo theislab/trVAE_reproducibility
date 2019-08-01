@@ -42,7 +42,7 @@ def train(data_name="pbmc", cell_type="CD4T", p_type="unbiased"):
     print("Prediction has been finished")
     all_Data = sc.AnnData(np.concatenate([ctrl_cell.X, stim_cell.X, predicted_cells]))
     all_Data.obs["condition"] = ["ctrl"] * ctrl_cell.shape[0] + ["real_stim"] * stim_cell.shape[0] + \
-                                ["pred_stim"] * len(predicted_cells)
+                                [f"{cell_type}_pred_{stim_key}"] * len(predicted_cells)
     all_Data.var_names = ctrl_cell.var_names
     if p_type == "unbiased":
         sc.write(f"../data/reconstructed/VecArithm_{cell_type}.h5ad", all_Data)

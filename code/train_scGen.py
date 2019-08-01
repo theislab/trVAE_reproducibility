@@ -38,7 +38,7 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
         print(f"network_{cell_type} has been trained!")
 
 
-def reconstruct_whole_data(data_name="pbmc", condition_key="condition"):
+def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_type_to_predict=None):
     stim_key = "Hpoly.Day10"
     ctrl_key = "Control"
     cell_type_key = "cell_label"
@@ -46,6 +46,8 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition"):
 
     all_data = anndata.AnnData()
     for idx, cell_type in enumerate(train.obs[cell_type_key].unique().tolist()):
+        if cell_type_to_predict is not None and cell_type != cell_type_to_predict:
+            continue
         print(f"Reconstructing for {cell_type}")
         network = scgen.VAEArith(x_dimension=train.X.shape[1],
                                  z_dimension=100,
