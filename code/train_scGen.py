@@ -81,7 +81,7 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
                                           obs={condition_key: [f"{cell_type}_real_stim"] * len(real_stim),
                                                cell_type_key: [cell_type] * len(real_stim)},
                                           var={"var_names": cell_type_data.var_names})
-        if idx == 0:
+        if idx == 0 or cell_type_to_predict is not None:
             all_data = ctrl_adata.concatenate(pred_adata, real_stim_adata)
         else:
             all_data = all_data.concatenate(ctrl_adata, pred_adata, real_stim_adata)
