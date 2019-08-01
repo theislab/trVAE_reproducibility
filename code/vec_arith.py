@@ -16,14 +16,14 @@ def train(data_name="pbmc", cell_type="CD4T", p_type="unbiased"):
     cell_type_key = "cell_label"
     data = sc.read(train_path)
     print("data has been loaded!")
+    train = data[~((data.obs["condition"].isin(stim_keys)) & (data.obs[cell_type_key] == cell_type))]
     ctrl_cell = data[(data.obs["condition"] == ctrl_key) & (data.obs[cell_type_key] == cell_type)]
     stim_cell = data[(data.obs["condition"] == stim_key) & (data.obs[cell_type_key] == cell_type)]
 
     train_real_cd = data[data.obs["condition"] == ctrl_key, :]
     if p_type == "unbiased":
         train_real_cd = scgen.util.balancer(train_real_cd, cell_type_key=cell_type_key)
-    train_real_stimulated = data[data.obs["condition"] == stim_key, :]
-    train_real_stimulated = train_real_stimulated[train_real_stimulated.obs[cell_type_key] != cell_type]
+    train_real_stimulated = train[train.obs["condition"] == stim_key, :]
     if p_type == "unbiased":
         train_real_stimulated = scgen.util.balancer(train_real_stimulated, cell_type_key=cell_type_key)
 
