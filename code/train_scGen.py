@@ -78,7 +78,7 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
         else:
             real_stim = cell_type_data[cell_type_data.obs[condition_key] == stim_key].X
         real_stim_adata = anndata.AnnData(real_stim,
-                                          obs={condition_key: [f"{cell_type}_real_stim"] * len(real_stim),
+                                          obs={condition_key: [f"{cell_type}_real_{stim_key}"] * len(real_stim),
                                                cell_type_key: [cell_type] * len(real_stim)},
                                           var={"var_names": cell_type_data.var_names})
         if idx == 0 or cell_type_to_predict is not None:

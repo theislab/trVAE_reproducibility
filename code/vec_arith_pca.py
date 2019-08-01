@@ -81,10 +81,11 @@ def train(data_name="pbmc", cell_type="CD4T", p_type="unbiased"):
     train_path = f"../data/{data_name}/train_{data_name}.h5ad"
     ctrl_key = "Control"
     stim_key = "Hpoly.Day10"
+    stim_keys = ['Hpoly.Day3', 'Hpoly.Day10', 'Salmonella']
     cell_type_key = "cell_label"
     data = sc.read(train_path)
     print("data has been loaded!")
-    train = data[~((data.obs["condition"] == stim_key) & (data.obs[cell_type_key] == cell_type))]
+    train = data[~((data.obs["condition"].isin(stim_keys)) & (data.obs[cell_type_key] == cell_type))]
     pca = PCA(n_components=100)
 
     pca.fit(train.X)
@@ -108,17 +109,17 @@ def train(data_name="pbmc", cell_type="CD4T", p_type="unbiased"):
     if sparse.issparse(adata_list[1].X):
         adata_list[1].X = adata_list[1].X.A
         adata_list[2].X = adata_list[2].X.A
-    ctrl_CD4T_PCA = pca.transform(adata_list[1].X)
-    predicted_cells = predict(pca, train_real_cd_PCA, train_real_stimulated_PCA, ctrl_CD4T_PCA, p_type)
+    ctrl_celltype_pca = pca.transform(adata_list[1].X)
+    predicted_cells = predict(pca, train_real_cd_PCA, train_real_stimulated_PCA, ctrl_celltype_pca, p_type)
 
     all_Data = sc.AnnData(np.concatenate([adata_list[1].X, adata_list[2].X, predicted_cells]))
     all_Data.obs["condition"] = ["ctrl"] * len(adata_list[1].X) + ["real_stim"] * len(adata_list[2].X) + \
                                 ["pred_stim"] * len(predicted_cells)
     all_Data.var_names = adata_list[3].var_names
     if p_type == "unbiased":
-        sc.write(f"../data/reconstructed/PCAVecArithm/PCA_CD4T.h5ad", all_Data)
+        sc.write(f"../data/reconstructed/PCAVecArithm/PCA_{cell_type}.h5ad", all_Data)
     else:
-        sc.write(f"../data/reconstructed/PCAVecArithm/PCA_CD4T_biased.h5ad", all_Data)
+        sc.write(f"../data/reconstructed/PCAVecArithm/PCA_{cell_type}_biased.h5ad", all_Data)
 
 
 if __name__ == "__main__":
