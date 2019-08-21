@@ -1,19 +1,19 @@
+from random import shuffle
+
 import numpy as np
 import scanpy.api as sc
-from random import shuffle
-import matplotlib.pyplot as plt
-from scipy import stats
 import seaborn as sns
+
 sc.settings.verbosity = 1  # show logging output
 sns.set_style("white")
 
+
 class data_reader():
 
-    def __init__(self,train_data, valid_data, conditions, tr_ct_list =None,ho_ct_list=None):
-
+    def __init__(self, train_data, valid_data, conditions, tr_ct_list=None, ho_ct_list=None):
 
         self.conditions = conditions
-        if(tr_ct_list and ho_ct_list):
+        if tr_ct_list and ho_ct_list:
             self.t_in = tr_ct_list
             self.t_out = ho_ct_list
             self.train_real = self.data_remover(train_data)
@@ -22,7 +22,7 @@ class data_reader():
             shuffle(ind_list)
             self.train_real = self.train_real[ind_list, :].X
             self.valid_real_adata = self.data_remover(valid_data)
-            self.valid_real =  self.valid_real_adata.X
+            self.valid_real = self.valid_real_adata.X
 
         else:
             self.train_real = train_data
@@ -33,26 +33,26 @@ class data_reader():
             self.valid_real_adata = valid_data
             self.valid_real = valid_data.X
 
-
-    def data_remover(self,adata):
+    def data_remover(self, adata):
         source_data = []
         for i in self.t_in:
             source_data.append(self.extractor(adata, i)[3])
         target_data = []
         for i in self.t_out:
             target_data.append(self.extractor(adata, i)[1])
-        mearged_data = self.training_data_provider(source_data,target_data)
+        mearged_data = self.training_data_provider(source_data, target_data)
         mearged_data.var_names = adata.var_names
         return mearged_data
 
     def extractor(self, data, cell_type):
         cell_with_both_condition = data[data.obs["cell_label"] == cell_type]
-        condtion_1 = data[(data.obs["cell_label"] == cell_type) & (data.obs["condition"] == self.conditions["ctrl"])]
+        condtion_1 = data[(data.obs["cell_label"] == cell_type) & (data.obs["condition"].isin(self.conditions["ctrl"]))]
         condtion_2 = data[(data.obs["cell_label"] == cell_type) & (data.obs["condition"].isin(self.conditions["stim"]))]
-        training = data[~((data.obs["cell_label"] ==cell_type) & (data.obs["condition"].isin(self.conditions["stim"])))]
+        training = data[
+            ~((data.obs["cell_label"] == cell_type) & (data.obs["condition"].isin(self.conditions["stim"])))]
         return [training, condtion_1, condtion_2, cell_with_both_condition]
 
-    def training_data_provider(self,train_s, train_t):
+    def training_data_provider(self, train_s, train_t):
         train_s_X = []
         train_s_diet = []
         train_s_groups = []
@@ -92,7 +92,7 @@ class data_reader():
         train_real.obs["cell_label"] = train_s_groups + train_t_groups
         return train_real
 
-    def balancer(self,data):
+    def balancer(self, data):
         class_names = np.unique(data.obs["cell_label"])
         class_pop = {}
         for cls in class_names:
@@ -122,5 +122,5 @@ class data_reader():
         class_pop = {}
         for cls in class_names:
             class_pop[cls] = len(balanced_data[balanced_data.obs["cell_label"] == cls])
-        #print(class_pop)
+        # print(class_pop)
         return balanced_data

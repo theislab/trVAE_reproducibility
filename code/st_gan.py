@@ -5,6 +5,7 @@ import scanpy.api as sc
 import tensorflow as tf
 from data_reader import data_reader
 
+
 def train_test_split(adata, train_frac=0.85):
     train_size = int(adata.shape[0] * train_frac)
     indices = np.arange(adata.shape[0])
@@ -16,6 +17,7 @@ def train_test_split(adata, train_frac=0.85):
     valid_data = adata[test_idx, :]
 
     return train_data, valid_data
+
 
 # =============================== downloading training and validation files ====================================
 data_path = "../data/haber/haber.h5ad"
@@ -31,8 +33,9 @@ print(os.getcwd())
 t_in = ['TA', 'TA.Early', 'Endocrine', 'Enterocyte', 'Enterocyte.Progenitor', 'Goblet', 'Stem']
 # heldout cells
 t_out = ['Tuft']
-target_conditions = ["Hpoly.Day3", 'Hpoly.Day10', 'Salmonella']
-dr = data_reader(data, validation, {"ctrl": "Control", "stim": target_conditions}, t_in, t_out)
+source_conditions = ["Control", 'Hpoly.Day3', 'Salmonella']
+target_conditions = ['Hpoly.Day10']
+dr = data_reader(data, validation, {"ctrl": source_conditions, "stim": target_conditions}, t_in, t_out)
 train_real = dr.train_real_adata
 train_real_stim = train_real[train_real.obs["condition"] == "Hpoly.Day10"]
 train_real_ctrl = train_real[train_real.obs["condition"] == "Control"]
@@ -274,6 +277,7 @@ def restore():
 
 if __name__ == "__main__":
     import sys
+
     path_to_save = "../results/"
     os.makedirs(path_to_save, exist_ok=True)
     sc.settings.figdir = path_to_save
