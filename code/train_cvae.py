@@ -11,6 +11,19 @@ control_condition = "Control"
 target_condition = 'Hpoly.Day10'
 
 
+def train_test_split(adata, train_frac=0.85):
+    train_size = int(adata.shape[0] * train_frac)
+    indices = np.arange(adata.shape[0])
+    np.random.shuffle(indices)
+    train_idx = indices[:train_size]
+    test_idx = indices[train_size:]
+
+    train_data = adata[train_idx, :]
+    valid_data = adata[test_idx, :]
+
+    return train_data, valid_data
+
+
 def label_encoder(adata, label_encoder=None, condition_key='condition'):
     if label_encoder is None:
         le = LabelEncoder()
@@ -23,12 +36,12 @@ def label_encoder(adata, label_encoder=None, condition_key='condition'):
     return labels.reshape(-1, 1), le
 
 
-train_adata = sc.read(f"../data/{data_name}/train_{data_name}.h5ad")
-valid_adata = sc.read(f"../data/{data_name}/valid_{data_name}.h5ad")
+adata = sc.read(f"../data/{data_name}/{data_name}.h5ad")
+train_adata, valid_adata = train_test_split(adata, 0.80)
 
 le = {"Control": 0, "Hpoly.Day3": 1, "Hpoly.Day10": 2, "Salmonella": 3}
 
-target_conditions = ['Hpoly.Day3', 'Hpoly.Day10', 'Salmonella']
+target_conditions = ['Hpoly.Day10']
 
 net_train_adata = train_adata[
     ~((train_adata.obs[cell_type_key] == specific_cell_type) & (
