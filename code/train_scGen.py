@@ -112,7 +112,7 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
 
 
 if __name__ == '__main__':
-    test_train_whole_data_one_celltype_out("haber", z_dim=100, alpha=0.00005, n_epochs=300, batch_size=32,
+    test_train_whole_data_one_celltype_out("haber", z_dim=100, alpha=0.00005, n_epochs=100, batch_size=32,
                                            dropout_rate=0.2, learning_rate=0.001, cell_type_to_train="Tuft")
 
     reconstruct_whole_data("haber", cell_type_to_predict="Tuft")
