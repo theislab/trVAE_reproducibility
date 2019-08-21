@@ -1,7 +1,21 @@
 import anndata
+import numpy as np
 import scanpy as sc
 import scgen
 from scipy import sparse
+
+
+def train_test_split(adata, train_frac=0.85):
+    train_size = int(adata.shape[0] * train_frac)
+    indices = np.arange(adata.shape[0])
+    np.random.shuffle(indices)
+    train_idx = indices[:train_size]
+    test_idx = indices[train_size:]
+
+    train_data = adata[train_idx, :]
+    valid_data = adata[test_idx, :]
+
+    return train_data, valid_data
 
 
 def test_train_whole_data_one_celltype_out(data_name="pbmc",
@@ -13,27 +27,26 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
                                            learning_rate=0.001,
                                            condition_key="condition",
                                            cell_type_to_train=None):
-    
-    stim_keys = ["Hpoly.Day3", "Hpoly.Day10", "Salmonella"]
-    ctrl_key = "Control"
+    stim_keys = ["Hpoly.Day10"]
     cell_type_key = "cell_label"
-    train = sc.read(f"../data/{data_name}/train_{data_name}.h5ad")
-    valid = sc.read(f"../data/{data_name}/valid_{data_name}.h5ad")
+    adata = sc.read(f"../data/{data_name}/{data_name}.h5ad")
+    train_adata, valid_adata = train_test_split(adata, 0.80)
 
-    for cell_type in train.obs[cell_type_key].unique().tolist():
+    for cell_type in train_adata.obs[cell_type_key].unique().tolist():
         if cell_type_to_train is not None and cell_type != cell_type_to_train:
             continue
-        net_train_data = train[~((train.obs[cell_type_key] == cell_type) & (train.obs[condition_key].isin(stim_keys)))]
-        net_valid_data = valid[~((valid.obs[cell_type_key] == cell_type) & (valid.obs[condition_key].isin(stim_keys)))]
-        network = scgen.VAEArith(x_dimension=net_train_data.X.shape[1],
+        net_train_adata = train_adata[~((train_adata.obs[cell_type_key] == cell_type) & (train_adata.obs[condition_key].isin(stim_keys)))]
+        net_valid_adata = valid_adata[~((valid_adata.obs[cell_type_key] == cell_type) & (valid_adata.obs[condition_key].isin(stim_keys)))]
+        network = scgen.VAEArith(x_dimension=net_train_adata.X.shape[1],
                                  z_dimension=z_dim,
                                  alpha=alpha,
                                  dropout_rate=dropout_rate,
                                  learning_rate=learning_rate,
                                  model_path=f"../models/scGen/{data_name}/{cell_type}/scgen")
 
-        network.train(net_train_data, use_validation=True, valid_data=net_valid_data, n_epochs=n_epochs, batch_size=batch_size,
-                     verbose=True, early_stop_limit=5)
+        network.train(net_train_adata, use_validation=True, valid_data=net_valid_adata, n_epochs=n_epochs,
+                      batch_size=batch_size,
+                      verbose=True, early_stop_limit=5)
         network.sess.close()
         print(f"network_{cell_type} has been trained!")
 
@@ -94,6 +107,5 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
 if __name__ == '__main__':
     test_train_whole_data_one_celltype_out("haber", z_dim=100, alpha=0.00005, n_epochs=300, batch_size=32,
                                            dropout_rate=0.2, learning_rate=0.001, cell_type_to_train="Tuft")
-    
-    reconstruct_whole_data("haber", cell_type_to_predict="Tuft")
 
+    reconstruct_whole_data("haber", cell_type_to_predict="Tuft")
