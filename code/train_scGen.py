@@ -27,9 +27,13 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
                                            learning_rate=0.001,
                                            condition_key="condition",
                                            cell_type_to_train=None):
+    keys = ['Control', 'Hpoly.Day10']
     stim_keys = ["Hpoly.Day10"]
     cell_type_key = "cell_label"
+
     adata = sc.read(f"../data/{data_name}/{data_name}.h5ad")
+    adata = adata.copy()[adata.obs[condition_key].isin(keys)]
+
     train_adata, valid_adata = train_test_split(adata, 0.80)
 
     for cell_type in train_adata.obs[cell_type_key].unique().tolist():
@@ -52,17 +56,20 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
 
 
 def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_type_to_predict=None):
+    keys = ["Control", "Hpoly.Day10"]
     stim_key = "Hpoly.Day10"
     ctrl_key = "Control"
     cell_type_key = "cell_label"
-    train = sc.read(f"../data/{data_name}/train_{data_name}.h5ad")
+
+    adata = sc.read(f"../data/{data_name}/{data_name}.h5ad")
+    adata = adata.copy()[adata.obs[condition_key].isin(keys)]
 
     all_data = anndata.AnnData()
-    for idx, cell_type in enumerate(train.obs[cell_type_key].unique().tolist()):
+    for idx, cell_type in enumerate(adata.obs[cell_type_key].unique().tolist()):
         if cell_type_to_predict is not None and cell_type != cell_type_to_predict:
             continue
         print(f"Reconstructing for {cell_type}")
-        network = scgen.VAEArith(x_dimension=train.X.shape[1],
+        network = scgen.VAEArith(x_dimension=adata.X.shape[1],
                                  z_dimension=100,
                                  alpha=0.00005,
                                  dropout_rate=0.2,
@@ -70,9 +77,9 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
                                  model_path=f"../models/scGen/{data_name}/{cell_type}/scgen")
         network.restore_model()
 
-        cell_type_data = train[train.obs[cell_type_key] == cell_type]
-        cell_type_ctrl_data = train[((train.obs[cell_type_key] == cell_type) & (train.obs[condition_key] == ctrl_key))]
-        net_train_data = train[~((train.obs[cell_type_key] == cell_type) & (train.obs[condition_key] == stim_key))]
+        cell_type_data = adata[adata.obs[cell_type_key] == cell_type]
+        cell_type_ctrl_data = adata[((adata.obs[cell_type_key] == cell_type) & (adata.obs[condition_key] == ctrl_key))]
+        net_train_data = adata[~((adata.obs[cell_type_key] == cell_type) & (adata.obs[condition_key] == stim_key))]
         pred, delta = network.predict(adata=net_train_data,
                                       conditions={"ctrl": ctrl_key, "stim": stim_key},
                                       cell_type_key=cell_type_key,

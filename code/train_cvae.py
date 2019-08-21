@@ -35,11 +35,14 @@ def label_encoder(adata, label_encoder=None, condition_key='condition'):
             labels[adata.obs[condition_key] == condition] = label
     return labels.reshape(-1, 1), le
 
+keys = ["Control", "Hpoly.Day10"]
 
 adata = sc.read(f"../data/{data_name}/{data_name}.h5ad")
+adata = adata.copy()[adata.obs[condition_key].isin(keys)]
+
 train_adata, valid_adata = train_test_split(adata, 0.80)
 
-le = {"Control": 0, "Hpoly.Day3": 1, "Hpoly.Day10": 2, "Salmonella": 3}
+le = {"Control": 0, "Hpoly.Day10": 1}
 
 target_conditions = ['Hpoly.Day10']
 

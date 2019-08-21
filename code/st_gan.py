@@ -33,7 +33,7 @@ print(os.getcwd())
 t_in = ['TA', 'TA.Early', 'Endocrine', 'Enterocyte', 'Enterocyte.Progenitor', 'Goblet', 'Stem']
 # heldout cells
 t_out = ['Tuft']
-source_conditions = ["Control", 'Hpoly.Day3', 'Salmonella']
+source_conditions = ["Control"]
 target_conditions = ['Hpoly.Day10']
 dr = data_reader(data, validation, {"ctrl": source_conditions, "stim": target_conditions}, t_in, t_out)
 train_real = dr.train_real_adata
