@@ -20,7 +20,9 @@ def train_test_split(adata, train_frac=0.85):
 
 
 # =============================== downloading training and validation files ====================================
-data_path = "../data/haber/haber.h5ad"
+data_name = "haber"
+
+data_path = f"../data/{data_name}/{data_name}.h5ad"
 
 adata = sc.read(data_path)
 data, validation = train_test_split(adata, 0.80)
@@ -29,16 +31,30 @@ import os
 
 print(os.getcwd())
 # =============================== data gathering ====================================
-# training cells
-t_in = ['TA', 'TA.Early', 'Endocrine', 'Enterocyte', 'Enterocyte.Progenitor', 'Goblet', 'Stem']
-# heldout cells
-t_out = ['Tuft']
-source_conditions = ["Control"]
-target_conditions = ['Hpoly.Day10']
+if data_name == "haber":
+    # training cells
+    t_in = ['TA', 'TA.Early', 'Endocrine', 'Enterocyte', 'Enterocyte.Progenitor', 'Goblet', 'Stem']
+    # heldout cells
+    t_out = ['Tuft']
+    
+    source_conditions = ["Control"]
+    target_conditions = ['Hpoly.Day10']
+    
+    specific_cell_type = "Tuft"
+elif data_name == "species":
+    t_in = ['rabbit', 'mouse', 'pig']
+    t_out = ['rat']
+    
+    source_conditions = ["unst"]
+    target_conditions = ['LPS6']
+    
+    specific_cell_type = "rat"
+    
+
 dr = data_reader(data, validation, {"ctrl": source_conditions, "stim": target_conditions}, t_in, t_out)
 train_real = dr.train_real_adata
-train_real_stim = train_real[train_real.obs["condition"] == "Hpoly.Day10"]
-train_real_ctrl = train_real[train_real.obs["condition"] == "Control"]
+train_real_stim = train_real[train_real.obs["condition"].isin(target_conditions)]
+train_real_ctrl = train_real[train_real.obs["condition"].isin(source_conditions)]
 train_real_stim = train_real_stim.X
 ind_list = [i for i in range(train_real_stim.shape[0])]
 shuffle(ind_list)
@@ -278,7 +294,7 @@ def restore():
 if __name__ == "__main__":
     import sys
 
-    path_to_save = "../results/"
+    path_to_save = f"../results/CycleGAN/{data_name}/"
     os.makedirs(path_to_save, exist_ok=True)
     sc.settings.figdir = path_to_save
     sc.settings.writedir = "../data"
@@ -288,15 +304,15 @@ if __name__ == "__main__":
     else:
         restore()
     print("model has been trained/restored!")
-    adata_list = dr.extractor(data, "Tuft")
+    adata_list = dr.extractor(data, specific_cell_type)
     ctrl_CD4T = adata_list[1]
     if sys.argv[1] == "train":
         predicted_cells = predict(ctrl_CD4T.X)
         all_Data = sc.AnnData(np.concatenate([adata_list[1].X, adata_list[2].X, predicted_cells]))
-        all_Data.obs["condition"] = ["ctrl"] * len(adata_list[1].X) + ["real_Hpoly.Day10"] * len(adata_list[2].X) + \
-                                    ["pred_Hpoly.Day10"] * len(predicted_cells)
+        all_Data.obs["condition"] = ["ctrl"] * len(adata_list[1].X) + [f"real_{target_conditions[0]}"] * len(adata_list[2].X) + \
+                                    [f"pred_{target_conditions[0]}"] * len(predicted_cells)
         all_Data.var_names = adata_list[3].var_names
-        all_Data.write("../data/reconstructed/cgan_Tuft.h5ad")
+        all_Data.write(f"../data/reconstructed/{data_name}/cgan_{specific_cell_type}.h5ad")
     elif sys.argv[1] == "latent":
         low_dim = low_embed_stim(train_real.X)
         dt = sc.AnnData(low_dim)

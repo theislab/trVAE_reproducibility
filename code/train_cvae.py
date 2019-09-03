@@ -3,13 +3,7 @@ import rcvae
 import scanpy as sc
 from sklearn.preprocessing import LabelEncoder
 
-data_name = "haber"
-specific_cell_type = "Tuft"
-cell_type_key = "cell_label"
-condition_key = "condition"
-control_condition = "Control"
-target_condition = 'Hpoly.Day10'
-
+data_name = "species"
 
 def train_test_split(adata, train_frac=0.85):
     train_size = int(adata.shape[0] * train_frac)
@@ -34,17 +28,31 @@ def label_encoder(adata, label_encoder=None, condition_key='condition'):
         for condition, label in label_encoder.items():
             labels[adata.obs[condition_key] == condition] = label
     return labels.reshape(-1, 1), le
+if data_name == "haber":
+    keys = ["Control", "Hpoly.Day10"]
+    specific_cell_type = "Tuft"
+    cell_type_key = "cell_label"
+    condition_key = "condition"
+    control_condition = "Control"
+    target_condition = 'Hpoly.Day10'
+    target_conditions = ['Hpoly.Day10']
+    le = {"Control": 0, "Hpoly.Day10": 1}
 
-keys = ["Control", "Hpoly.Day10"]
-
+elif data_name == "species":
+    keys = ["unst", "LPS6"]
+    specific_cell_type = "rat"
+    cell_type_key = "species"
+    condition_key = "condition"
+    control_condition = "unst"
+    target_condition = "LPS6"
+    target_conditions = ['LPS6']
+    le = {"unst": 0, "LPS6": 1}
+    
 adata = sc.read(f"../data/{data_name}/{data_name}.h5ad")
 adata = adata.copy()[adata.obs[condition_key].isin(keys)]
 
 train_adata, valid_adata = train_test_split(adata, 0.80)
 
-le = {"Control": 0, "Hpoly.Day10": 1}
-
-target_conditions = ['Hpoly.Day10']
 
 net_train_adata = train_adata[
     ~((train_adata.obs[cell_type_key] == specific_cell_type) & (
@@ -57,11 +65,11 @@ z_dim = 20
 network = rcvae.CVAE(x_dimension=net_train_adata.X.shape[1],
                      z_dimension=z_dim,
                      alpha=0.1,
-                     model_path="../models/CVAE/haber/Tuft/cvae")
+                     model_path=f"../models/CVAE/{data_name}/{specific_cell_type}/cvae")
 network.train(net_train_adata,
               use_validation=True,
               valid_data=net_valid_adata,
-              n_epochs=100)
+              n_epochs=1000)
 
 train_labels, _ = label_encoder(train_adata, le, 'condition')
 cell_type_adata = train_adata[train_adata.obs[cell_type_key] == specific_cell_type]
@@ -76,4 +84,4 @@ pred_adata.obs[cell_type_key] = specific_cell_type
 pred_adata.var_names = cell_type_adata.var_names
 all_adata = cell_type_adata.concatenate(pred_adata)
 
-all_adata.write(f"../data/reconstructed/CVAE_{specific_cell_type}.h5ad")
+all_adata.write(f"../data/reconstructed/MethodComparison/{data_name}/CVAE-{specific_cell_type}.h5ad")

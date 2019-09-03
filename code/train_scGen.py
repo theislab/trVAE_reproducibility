@@ -27,9 +27,14 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
                                            learning_rate=0.001,
                                            condition_key="condition",
                                            cell_type_to_train=None):
-    keys = ['Control', 'Hpoly.Day10']
-    stim_keys = ["Hpoly.Day10"]
-    cell_type_key = "cell_label"
+    if data_name == "haber":
+        keys = ['Control', 'Hpoly.Day10']
+        stim_keys = ["Hpoly.Day10"]
+        cell_type_key = "cell_label"
+    elif data_name == "species":
+        keys = ['unst', 'LPS6']
+        stim_keys = ["LPS6"]
+        cell_type_key = "species"
 
     adata = sc.read(f"../data/{data_name}/{data_name}.h5ad")
     adata = adata.copy()[adata.obs[condition_key].isin(keys)]
@@ -56,10 +61,16 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
 
 
 def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_type_to_predict=None):
-    keys = ["Control", "Hpoly.Day10"]
-    stim_key = "Hpoly.Day10"
-    ctrl_key = "Control"
-    cell_type_key = "cell_label"
+    if data_name == "haber":
+        keys = ["Control", "Hpoly.Day10"]
+        stim_key = "Hpoly.Day10"
+        ctrl_key = "Control"
+        cell_type_key = "cell_label"
+    elif data_name == "species":
+        keys = ['unst', 'LPS6']
+        stim_key = "LPS6"
+        ctrl_key = "unst"
+        cell_type_key = "species"
 
     adata = sc.read(f"../data/{data_name}/{data_name}.h5ad")
     adata = adata.copy()[adata.obs[condition_key].isin(keys)]
@@ -108,11 +119,11 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
 
         print(f"Finish Reconstructing for {cell_type}")
         network.sess.close()
-    all_data.write_h5ad(f"../data/reconstructed/scGen/{data_name}.h5ad")
+    all_data.write_h5ad(f"../data/reconstructed/{data_name}/scGen-{cell_type_to_predict}.h5ad")
 
 
 if __name__ == '__main__':
-    test_train_whole_data_one_celltype_out("haber", z_dim=100, alpha=0.00005, n_epochs=100, batch_size=32,
-                                           dropout_rate=0.2, learning_rate=0.001, cell_type_to_train="Tuft")
+    test_train_whole_data_one_celltype_out("species", z_dim=100, alpha=0.00005, n_epochs=300, batch_size=32,
+                                           dropout_rate=0.2, learning_rate=0.001, cell_type_to_train="rat")
 
-    reconstruct_whole_data("haber", cell_type_to_predict="Tuft")
+    reconstruct_whole_data("species", cell_type_to_predict="rat")
