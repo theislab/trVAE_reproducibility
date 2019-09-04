@@ -29,7 +29,7 @@ adata = sc.read(data_path)
 
 if adata.shape[0] > 2000:
     sc.pp.highly_variable_genes(adata, n_top_genes=2000)
-    adata = adata[adata, adata.var['highly_variable']]
+    adata = adata[:, adata.var['highly_variable']]
     
 data, validation = train_test_split(adata, 0.80)
 
