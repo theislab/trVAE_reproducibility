@@ -1,4 +1,5 @@
 from random import shuffle
+import sys
 
 import numpy as np
 import scanpy.api as sc
@@ -20,7 +21,7 @@ def train_test_split(adata, train_frac=0.85):
 
 
 # =============================== downloading training and validation files ====================================
-data_name = "kang"
+data_name = sys.argv[1]
 
 data_path = f"../data/{data_name}/{data_name}.h5ad"
 
@@ -305,28 +306,25 @@ def restore():
 
 
 if __name__ == "__main__":
-    import sys
-
     path_to_save = f"../results/CycleGAN/{data_name}/"
     os.makedirs(path_to_save, exist_ok=True)
     sc.settings.figdir = path_to_save
     sc.settings.writedir = "../data"
-    print(sys.argv[1])
-    if sys.argv[1] == "train":
+    if sys.argv[2] == "train":
         train(1000, initial_run=True)
     else:
         restore()
     print("model has been trained/restored!")
     adata_list = dr.extractor(data, specific_cell_type)
     ctrl_CD4T = adata_list[1]
-    if sys.argv[1] == "train":
+    if sys.argv[2] == "train":
         predicted_cells = predict(ctrl_CD4T.X)
         all_Data = sc.AnnData(np.concatenate([adata_list[1].X, adata_list[2].X, predicted_cells]))
         all_Data.obs["condition"] = ["ctrl"] * len(adata_list[1].X) + [f"real_{target_conditions[0]}"] * len(adata_list[2].X) + \
                                     [f"pred_{target_conditions[0]}"] * len(predicted_cells)
         all_Data.var_names = adata_list[3].var_names
         all_Data.write(f"../data/reconstructed/{data_name}/cgan_{specific_cell_type}.h5ad")
-    elif sys.argv[1] == "latent":
+    elif sys.argv[2] == "latent":
         low_dim = low_embed_stim(train_real.X)
         dt = sc.AnnData(low_dim)
         sc.pp.neighbors(dt)
