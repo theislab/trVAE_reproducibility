@@ -3,7 +3,7 @@ import rcvae
 import scanpy as sc
 from sklearn.preprocessing import LabelEncoder
 
-data_name = "species"
+data_name = "kang"
 
 def train_test_split(adata, train_frac=0.85):
     train_size = int(adata.shape[0] * train_frac)
@@ -47,6 +47,15 @@ elif data_name == "species":
     target_condition = "LPS6"
     target_conditions = ['LPS6']
     le = {"unst": 0, "LPS6": 1}
+elif data_name == "kang":
+    keys = ["CTRL", "STIM"]
+    specific_cell_type = "NK"
+    cell_type_key = "cell_type"
+    condition_key = "condition"
+    control_condition = "CTRL"
+    target_condition = "STIM"
+    target_conditions = ['STIM']
+    le = {"unst": 0, "STIM": 1}
     
 adata = sc.read(f"../data/{data_name}/{data_name}.h5ad")
 adata = adata.copy()[adata.obs[condition_key].isin(keys)]
@@ -69,7 +78,7 @@ network = rcvae.CVAE(x_dimension=net_train_adata.X.shape[1],
 network.train(net_train_adata,
               use_validation=True,
               valid_data=net_valid_adata,
-              n_epochs=1000)
+              n_epochs=300)
 
 train_labels, _ = label_encoder(train_adata, le, 'condition')
 cell_type_adata = train_adata[train_adata.obs[cell_type_key] == specific_cell_type]

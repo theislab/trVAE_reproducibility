@@ -35,6 +35,10 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
         keys = ['unst', 'LPS6']
         stim_keys = ["LPS6"]
         cell_type_key = "species"
+    elif data_name == "kang":
+        keys = ['CTRL', 'STIM']
+        stim_keys = ["STIM"]
+        cell_type_key = "cell_type"
 
     adata = sc.read(f"../data/{data_name}/{data_name}.h5ad")
     adata = adata.copy()[adata.obs[condition_key].isin(keys)]

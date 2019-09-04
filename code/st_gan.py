@@ -20,11 +20,16 @@ def train_test_split(adata, train_frac=0.85):
 
 
 # =============================== downloading training and validation files ====================================
-data_name = "haber"
+data_name = "kang"
 
 data_path = f"../data/{data_name}/{data_name}.h5ad"
 
 adata = sc.read(data_path)
+
+if adata.shape[0] > 2000:
+    sc.pp.highly_variable_genes(adata, n_top_genes=2000)
+    adata = adata[adata, adata.var['highly_variable']]
+    
 data, validation = train_test_split(adata, 0.80)
 
 import os
@@ -49,6 +54,14 @@ elif data_name == "species":
     target_conditions = ['LPS6']
     
     specific_cell_type = "rat"
+elif data_name == "kang":
+    t_in = ['CD14 Mono', 'CD4 T', 'B', 'CD16 Mono', 'CD8 T', 'T', 'DC']
+    t_out = ['NK']
+    
+    source_conditions = ["CTRL"]
+    target_conditions = ['STIM']
+    
+    specific_cell_type = "NK"
     
 
 dr = data_reader(data, validation, {"ctrl": source_conditions, "stim": target_conditions}, t_in, t_out)
