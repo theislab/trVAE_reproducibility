@@ -1,9 +1,10 @@
 import numpy as np
 import rcvae
 import scanpy as sc
+import sys
 from sklearn.preprocessing import LabelEncoder
 
-data_name = "kang"
+data_name = sys.argv[1]
 
 def train_test_split(adata, train_frac=0.85):
     train_size = int(adata.shape[0] * train_frac)
@@ -93,4 +94,4 @@ pred_adata.obs[cell_type_key] = specific_cell_type
 pred_adata.var_names = cell_type_adata.var_names
 all_adata = cell_type_adata.concatenate(pred_adata)
 
-all_adata.write(f"../data/reconstructed/MethodComparison/{data_name}/CVAE-{specific_cell_type}.h5ad")
+all_adata.write(f"../data/reconstructed/{data_name}/CVAE-{specific_cell_type}.h5ad")

@@ -14,7 +14,7 @@ def main():
         command = "python ./vec_arith.py"
         subprocess.call([command], shell=True)
 
-        command = "python ./st_gan.py train"
+        command = "python ./cgan.py train"
         subprocess.call([command], shell=True)
 
         command = "python ./train_cvae.py"
@@ -30,7 +30,7 @@ def main():
         command = "python ./vec_arith.py"
         subprocess.call([command], shell=True)
     elif model_to_train == "STGAN":
-        command = "python ./st_gan.py train"
+        command = "python ./cgan.py train"
         subprocess.call([command], shell=True)
     elif model_to_train == "CVAE":
         command = "python ./train_cvae.py"

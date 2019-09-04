@@ -127,7 +127,17 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
 
 
 if __name__ == '__main__':
-    test_train_whole_data_one_celltype_out("species", z_dim=100, alpha=0.00005, n_epochs=300, batch_size=32,
+    import sys
+    data_name = sys.argv[1]
+
+    if data_name == "haber":
+        specific_cell_type = "Tuft"
+    elif data_name == "kang":
+        specific_cell_type = "NK"
+    elif data_name == "species":
+        specific_cell_type = "rat"
+
+    test_train_whole_data_one_celltype_out(data_name, z_dim=100, alpha=0.00005, n_epochs=300, batch_size=32,
                                            dropout_rate=0.2, learning_rate=0.001, cell_type_to_train="rat")
 
-    reconstruct_whole_data("species", cell_type_to_predict="rat")
+    reconstruct_whole_data(data_name, cell_type_to_predict=specific_cell_type)

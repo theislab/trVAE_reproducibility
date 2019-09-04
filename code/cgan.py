@@ -323,7 +323,7 @@ if __name__ == "__main__":
         all_Data.obs["condition"] = ["ctrl"] * len(adata_list[1].X) + [f"real_{target_conditions[0]}"] * len(adata_list[2].X) + \
                                     [f"pred_{target_conditions[0]}"] * len(predicted_cells)
         all_Data.var_names = adata_list[3].var_names
-        all_Data.write(f"../data/reconstructed/{data_name}/cgan_{specific_cell_type}.h5ad")
+        all_Data.write(f"../data/reconstructed/{data_name}/cgan-{specific_cell_type}.h5ad")
     elif sys.argv[2] == "latent":
         low_dim = low_embed_stim(train_real.X)
         dt = sc.AnnData(low_dim)
