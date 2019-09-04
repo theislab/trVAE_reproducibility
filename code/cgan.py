@@ -47,6 +47,8 @@ if data_name == "haber":
     target_conditions = ['Hpoly.Day10']
     
     specific_cell_type = "Tuft"
+
+    cell_type_key = "cell_label"
 elif data_name == "species":
     t_in = ['rabbit', 'mouse', 'pig']
     t_out = ['rat']
@@ -55,6 +57,7 @@ elif data_name == "species":
     target_conditions = ['LPS6']
     
     specific_cell_type = "rat"
+    cell_type_key = "species"
 elif data_name == "kang":
     t_in = ['CD14 Mono', 'CD4 T', 'B', 'CD16 Mono', 'CD8 T', 'T', 'DC']
     t_out = ['NK']
@@ -63,9 +66,11 @@ elif data_name == "kang":
     target_conditions = ['STIM']
     
     specific_cell_type = "NK"
+
+    cell_type_key = "cell_type"
     
 
-dr = data_reader(data, validation, {"ctrl": source_conditions, "stim": target_conditions}, t_in, t_out)
+dr = data_reader(data, validation, {"ctrl": source_conditions, "stim": target_conditions}, t_in, t_out, cell_type_key)
 train_real = dr.train_real_adata
 train_real_stim = train_real[train_real.obs["condition"].isin(target_conditions)]
 train_real_ctrl = train_real[train_real.obs["condition"].isin(source_conditions)]
