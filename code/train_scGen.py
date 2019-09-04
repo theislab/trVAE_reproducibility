@@ -40,8 +40,12 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
         stim_keys = ["STIM"]
         cell_type_key = "cell_type"
 
-    adata = sc.read(f"../data/{data_name}/{data_name}.h5ad")
+    adata = sc.read(f"../data/{data_name}/{data_name}_normalized.h5ad")
     adata = adata.copy()[adata.obs[condition_key].isin(keys)]
+
+    if adata.shape[1] > 2000:
+        sc.pp.highly_variable_genes(adata, n_top_genes=2000)
+        adata = adata[:, adata.var['highly_variable']]
 
     train_adata, valid_adata = train_test_split(adata, 0.80)
 
