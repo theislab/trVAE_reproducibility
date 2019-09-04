@@ -48,6 +48,7 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
     for cell_type in train_adata.obs[cell_type_key].unique().tolist():
         if cell_type_to_train is not None and cell_type != cell_type_to_train:
             continue
+        print(f"Training for {cell_type}")
         net_train_adata = train_adata[~((train_adata.obs[cell_type_key] == cell_type) & (train_adata.obs[condition_key].isin(stim_keys)))]
         net_valid_adata = valid_adata[~((valid_adata.obs[cell_type_key] == cell_type) & (valid_adata.obs[condition_key].isin(stim_keys)))]
         network = scgen.VAEArith(x_dimension=net_train_adata.X.shape[1],
