@@ -75,6 +75,11 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
         stim_key = "LPS6"
         ctrl_key = "unst"
         cell_type_key = "species"
+    elif data_name == "kang":
+        keys = ['CTRL', 'STIM']
+        stim_key = "STIM"
+        ctrl_key = "CTRL"
+        cell_type_key = "cell_type"
 
     adata = sc.read(f"../data/{data_name}/{data_name}.h5ad")
     adata = adata.copy()[adata.obs[condition_key].isin(keys)]
