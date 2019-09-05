@@ -80,22 +80,27 @@ network = rcvae.CVAE(x_dimension=net_train_adata.X.shape[1],
                      z_dimension=z_dim,
                      alpha=0.1,
                      model_path=f"../models/CVAE/{data_name}/{specific_cell_type}/cvae")
-network.train(net_train_adata,
-              use_validation=True,
-              valid_data=net_valid_adata,
-              n_epochs=300)
+if len(sys.argv) <= 2:
+    network.train(net_train_adata,
+                  use_validation=True,
+                  valid_data=net_valid_adata,
+                  n_epochs=300)
 
-train_labels, _ = label_encoder(train_adata, le, 'condition')
-cell_type_adata = train_adata[train_adata.obs[cell_type_key] == specific_cell_type]
+    train_labels, _ = label_encoder(train_adata, le, 'condition')
+    cell_type_adata = train_adata[train_adata.obs[cell_type_key] == specific_cell_type]
 
-unperturbed_data = cell_type_adata[cell_type_adata.obs[condition_key] == control_condition]
-target_labels = np.zeros((len(unperturbed_data), 1)) + le[target_condition]
-predicted_cells = network.predict(unperturbed_data, target_labels)
-pred_adata = sc.AnnData(predicted_cells,
-                        obs={condition_key: [f"{specific_cell_type}_pred_{target_condition}"] * len(target_labels)})
-pred_adata.obs['method'] = 'CVAE'
-pred_adata.obs[cell_type_key] = specific_cell_type
-pred_adata.var_names = cell_type_adata.var_names
-all_adata = cell_type_adata.concatenate(pred_adata)
+    unperturbed_data = cell_type_adata[cell_type_adata.obs[condition_key] == control_condition]
+    target_labels = np.zeros((len(unperturbed_data), 1)) + le[target_condition]
+    predicted_cells = network.predict(unperturbed_data, target_labels)
+    pred_adata = sc.AnnData(predicted_cells,
+                            obs={condition_key: [f"{specific_cell_type}_pred_{target_condition}"] * len(target_labels)})
+    pred_adata.obs['method'] = 'CVAE'
+    pred_adata.obs[cell_type_key] = specific_cell_type
+    pred_adata.var_names = cell_type_adata.var_names
+    all_adata = cell_type_adata.concatenate(pred_adata)
 
-all_adata.write(f"../data/reconstructed/{data_name}/CVAE-{specific_cell_type}.h5ad")
+    all_adata.write(f"../data/reconstructed/{data_name}/CVAE-{specific_cell_type}.h5ad")
+else:
+    network.restore_model()
+    labels, _ = label_encoder(adata, condition_key=condition_key)
+    latent = network.to_latent(adata, labels)
