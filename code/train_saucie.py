@@ -50,7 +50,7 @@ elif data_name == "kang":
 else:
     raise Exception("InValid data name")
 
-adata = sc.read(f"../RCVAE/data/{data_name}/{data_name}_normalized.h5ad")
+adata = sc.read(f"../data/{data_name}/{data_name}_normalized.h5ad")
 adata = adata.copy()[adata.obs[condition_key].isin(conditions)]
 
 if adata.shape[1] > 2000:
