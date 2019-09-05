@@ -63,7 +63,7 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
                                  model_path=f"../models/scGen/{data_name}/{cell_type}/scgen")
 
         network.train(net_train_adata, use_validation=True, valid_data=net_valid_adata, n_epochs=n_epochs,
-                      batch_size=batch_size,
+                      batch_size=batch_size, save=True,
                       verbose=True, early_stop_limit=5)
         network.sess.close()
         print(f"network_{cell_type} has been trained!")
