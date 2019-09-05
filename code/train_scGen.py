@@ -89,6 +89,10 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
     adata = sc.read(f"../data/{data_name}/{data_name}.h5ad")
     adata = adata.copy()[adata.obs[condition_key].isin(keys)]
 
+    if adata.shape[1] > 2000:
+        sc.pp.highly_variable_genes(adata, n_top_genes=2000)
+        adata = adata[:, adata.var['highly_variable']]
+
     all_data = anndata.AnnData()
     for idx, cell_type in enumerate(adata.obs[cell_type_key].unique().tolist()):
         if cell_type_to_predict is not None and cell_type != cell_type_to_predict:
