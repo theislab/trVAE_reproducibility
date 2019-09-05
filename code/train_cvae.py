@@ -80,7 +80,7 @@ network = rcvae.CVAE(x_dimension=net_train_adata.X.shape[1],
                      z_dimension=z_dim,
                      alpha=0.1,
                      model_path=f"../models/CVAE/{data_name}/{specific_cell_type}/cvae")
-if len(sys.argv) <= 2:
+if sys.argv[2] == 'train':
     network.train(net_train_adata,
                   use_validation=True,
                   valid_data=net_valid_adata,
@@ -100,7 +100,36 @@ if len(sys.argv) <= 2:
     all_adata = cell_type_adata.concatenate(pred_adata)
 
     all_adata.write(f"../data/reconstructed/{data_name}/CVAE-{specific_cell_type}.h5ad")
-elif sys.argv[2] == 'latent':
+    print("Model has been trained")
+    sc.settings.figdir = "../results/kang/"
+    labels, _ = label_encoder(adata, condition_key=condition_key)
+
+    latent = network.to_latent(adata, labels)
+    latent_adata = sc.AnnData(X=latent)
+    latent_adata.obs = adata.obs.copy(deep=True)
+
+    mmd_latent = network.to_mmd_layer(adata, labels)
+    mmd_latent_adata = sc.AnnData(X=mmd_latent)
+    mmd_latent_adata.obs = adata.obs.copy(deep=True)
+
+    print("Latents has been computed")
+
+    sc.pp.neighbors(latent_adata)
+    sc.tl.umap(latent_adata)
+    sc.pl.umap(latent_adata, color=condition_key, frameon=False,
+               save='_CVAE_latent_condition.pdf')
+    sc.pl.umap(latent_adata, color=cell_type_key, frameon=False,
+               save='_CVAE_latent_celltype.pdf')
+
+    sc.pp.neighbors(mmd_latent_adata)
+    sc.tl.umap(mmd_latent_adata)
+    sc.pl.umap(mmd_latent_adata, color=condition_key, frameon=False,
+               save='_CVAE_MMD_latent_condition.pdf')
+    sc.pl.umap(mmd_latent_adata, color=cell_type_key, frameon=False,
+               save='_CVAE_MMD_latent_celltypes.pdf')
+    print("Latents has been plotted and saved")
+
+else:
     sc.settings.figdir = "../results/kang/"
     network.restore_model()
     labels, _ = label_encoder(adata, condition_key=condition_key)
