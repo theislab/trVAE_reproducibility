@@ -134,11 +134,11 @@ else:
     network.restore_model()
     labels, _ = label_encoder(adata, condition_key=condition_key)
 
-    latent = network.to_latent(adata, labels)
+    latent = network.to_latent(adata.X, labels)
     latent_adata = sc.AnnData(X=latent)
     latent_adata.obs = adata.obs.copy(deep=True)
 
-    mmd_latent = network.to_mmd_layer(adata, labels)
+    mmd_latent = network.to_mmd_layer(adata.X, labels)
     mmd_latent_adata = sc.AnnData(X=mmd_latent)
     mmd_latent_adata.obs = adata.obs.copy(deep=True)
 
