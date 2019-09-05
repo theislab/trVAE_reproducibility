@@ -100,7 +100,30 @@ if len(sys.argv) <= 2:
     all_adata = cell_type_adata.concatenate(pred_adata)
 
     all_adata.write(f"../data/reconstructed/{data_name}/CVAE-{specific_cell_type}.h5ad")
-else:
+elif sys.argv[2] == 'latent':
+    sc.settings.figdir = "../results/kang/"
     network.restore_model()
     labels, _ = label_encoder(adata, condition_key=condition_key)
+
     latent = network.to_latent(adata, labels)
+    latent_adata = sc.AnnData(X=latent)
+    latent_adata.obs = adata.obs.copy(deep=True)
+
+    mmd_latent = network.to_mmd_layer(adata, labels)
+    mmd_latent_adata = sc.AnnData(X=mmd_latent)
+    mmd_latent_adata.obs = adata.obs.copy(deep=True)
+
+    sc.pp.neighbors(latent_adata)
+    sc.tl.umap(latent_adata)
+    sc.pl.umap(latent_adata, color=condition_key, frameon=False,
+               save='_CVAE_latent_condition.pdf')
+    sc.pl.umap(latent_adata, color=cell_type_key, frameon=False,
+               save='_CVAE_latent_celltype.pdf')
+
+    sc.pp.neighbors(mmd_latent_adata)
+    sc.tl.umap(mmd_latent_adata)
+    sc.pl.umap(mmd_latent_adata, color=condition_key, frameon=False,
+           save='_CVAE_MMD_latent_condition.pdf')
+    sc.pl.umap(mmd_latent_adata, color=cell_type_key, frameon=False,
+               save='_CVAE_MMD_latent_celltypes.pdf')
+
