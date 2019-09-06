@@ -1,10 +1,13 @@
-import numpy as np
-import rcvae
-import scanpy as sc
 import sys
+
+import numpy as np
+import scanpy as sc
 from sklearn.preprocessing import LabelEncoder
 
+from reptrvae.models import CVAE
+
 data_name = sys.argv[1]
+
 
 def train_test_split(adata, train_frac=0.85):
     train_size = int(adata.shape[0] * train_frac)
@@ -29,6 +32,8 @@ def label_encoder(adata, label_encoder=None, condition_key='condition'):
         for condition, label in label_encoder.items():
             labels[adata.obs[condition_key] == condition] = label
     return labels.reshape(-1, 1), le
+
+
 if data_name == "haber":
     keys = ["Control", "Hpoly.Day10"]
     specific_cell_type = "Tuft"
@@ -57,7 +62,7 @@ elif data_name == "kang":
     target_condition = "STIM"
     target_conditions = ['STIM']
     le = {"unst": 0, "STIM": 1}
-    
+
 adata = sc.read(f"../data/{data_name}/{data_name}_normalized.h5ad")
 adata = adata.copy()[adata.obs[condition_key].isin(keys)]
 
@@ -67,7 +72,6 @@ if adata.shape[1] > 2000:
 
 train_adata, valid_adata = train_test_split(adata, 0.80)
 
-
 net_train_adata = train_adata[
     ~((train_adata.obs[cell_type_key] == specific_cell_type) & (
         train_adata.obs[condition_key].isin(target_conditions)))]
@@ -76,10 +80,10 @@ net_valid_adata = valid_adata[
         valid_adata.obs[condition_key].isin(target_conditions)))]
 
 z_dim = 20
-network = rcvae.CVAE(x_dimension=net_train_adata.X.shape[1],
-                     z_dimension=z_dim,
-                     alpha=0.1,
-                     model_path=f"../models/CVAE/{data_name}/{specific_cell_type}/cvae")
+network = CVAE(x_dimension=net_train_adata.X.shape[1],
+               z_dimension=z_dim,
+               alpha=0.1,
+               model_path=f"../models/CVAE/{data_name}/{specific_cell_type}/cvae")
 if sys.argv[2] == 'train':
     network.train(net_train_adata,
                   use_validation=True,
@@ -152,7 +156,6 @@ else:
     sc.pp.neighbors(mmd_latent_adata)
     sc.tl.umap(mmd_latent_adata)
     sc.pl.umap(mmd_latent_adata, color=condition_key, frameon=False,
-           save='_CVAE_MMD_latent_condition.pdf')
+               save='_CVAE_MMD_latent_condition.pdf')
     sc.pl.umap(mmd_latent_adata, color=cell_type_key, frameon=False,
                save='_CVAE_MMD_latent_celltypes.pdf')
-
