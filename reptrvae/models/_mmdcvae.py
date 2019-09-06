@@ -11,15 +11,16 @@ from keras.models import Model, load_model
 from keras.utils import to_categorical
 from scipy import sparse
 
-from trvae.models._losses import LOSSES
-from trvae.models._activations import ACTIVATIONS
-from trvae.models._utils import sample_z, print_message
-from trvae.utils import label_encoder, remove_sparsity
+from reptrvae.models._losses import LOSSES
+from reptrvae.models._activations import ACTIVATIONS
+from reptrvae.models._network import Network
+from reptrvae.models._utils import sample_z, print_message
+from reptrvae.utils import label_encoder, remove_sparsity
 
 log = logging.getLogger(__file__)
 
 
-class MMDCVAE:
+class MMDCVAE(Network):
     """
         Regularized C-VAE vector Network class. This class contains the implementation of Conditional
         Variational Auto-encoder network.
@@ -42,6 +43,7 @@ class MMDCVAE:
     """
 
     def __init__(self, x_dimension, z_dimension=100, n_conditions=3, **kwargs):
+        super().__init__()
         self.x_dim = x_dimension
         self.z_dim = z_dimension
         self.n_conditions = n_conditions
@@ -139,7 +141,7 @@ class MMDCVAE:
         decoder_mmd_model = Model(inputs=[self.z, self.decoder_labels], outputs=self.z, name='decoder_mmd')
         return decoder_model, decoder_mmd_model
 
-    def _create_network(self):
+    def __create_network(self):
         """
             Constructs the whole C-VAE network. It is step-by-step constructing the C-VAE
             network. First, It will construct the encoder part and get mu, log_var of
@@ -171,7 +173,7 @@ class MMDCVAE:
 
         return loss, mmd_loss
 
-    def _loss_function(self):
+    def __compile_network(self):
         """
             Defines the loss function of C-VAE network after constructing the whole
             network. This will define the KL Divergence and Reconstruction loss for

@@ -3,12 +3,13 @@ import logging
 import tensorflow
 from scipy import sparse
 
-from trvae.utils import label_encoder
+from reptrvae.models._network import Network
+from reptrvae.utils import label_encoder
 
 log = logging.getLogger(__file__)
 
 
-class CVAE:
+class CVAE(Network):
     """
         C-VAE vector Network class. This class contains the implementation of Conditional
         Variational Auto-encoder network.
@@ -31,6 +32,7 @@ class CVAE:
     """
 
     def __init__(self, x_dimension, z_dimension=100, **kwargs):
+        super().__init__()
         tensorflow.reset_default_graph()
         self.x_dim = x_dimension
         self.z_dim = z_dimension
@@ -48,8 +50,8 @@ class CVAE:
         self.time_step = tensorflow.placeholder(tensorflow.int32)
         self.size = tensorflow.placeholder(tensorflow.int32)
         self.init_w = tensorflow.contrib.layers.xavier_initializer()
-        self._create_network()
-        self._loss_function()
+        self.__create_network()
+        self.__compile_network()
         init = tensorflow.global_variables_initializer()
         self.sess = tensorflow.InteractiveSession()
         self.saver = tensorflow.train.Saver(max_to_keep=1)
@@ -118,7 +120,7 @@ class CVAE:
         eps = tensorflow.random_normal(shape=[self.size, self.z_dim])
         return self.mu + tensorflow.exp(self.log_var / 2) * eps
 
-    def _create_network(self):
+    def __create_network(self):
         """
             Constructs the whole C-VAE network. It is step-by-step constructing the C-VAE
             network. First, It will construct the encoder part and get mu, log_var of
@@ -157,7 +159,7 @@ class CVAE:
             -tensorflow.reduce_mean(tensorflow.square(tiled_x - tiled_y), axis=2) / tensorflow.cast(dim,
                                                                                                     tensorflow.float32))
 
-    def _loss_function(self):
+    def __compile_network(self):
         """
             Defines the loss function of C-VAE network after constructing the whole
             network. This will define the KL Divergence and Reconstruction loss for

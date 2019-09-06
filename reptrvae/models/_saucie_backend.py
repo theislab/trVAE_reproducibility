@@ -14,7 +14,7 @@ def nameop(op, name):
     return op
 
 
-class SAUCIE(object):
+class SAUCIE_BACKEND(object):
     """The SAUCIE model."""
 
     def __init__(self, input_dim,
