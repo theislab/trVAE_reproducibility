@@ -280,8 +280,8 @@ def binary_classifier(scg_object, adata, delta, condition_key, conditions, path_
         adata.X = adata.X.A
     cd = adata[adata.obs[condition_key] == conditions["ctrl"], :]
     stim = adata[adata.obs[condition_key] == conditions["stim"], :]
-    all_latent_cd = scg_object.to_latent(cd.X)
-    all_latent_stim = scg_object.to_latent(stim.X)
+    all_latent_cd = scg_object.to_latent(cd.X, )
+    all_latent_stim = scg_object.to_latent(stim.X, )
     dot_cd = numpy.zeros((len(all_latent_cd)))
     dot_sal = numpy.zeros((len(all_latent_stim)))
     for ind, vec in enumerate(all_latent_cd):
