@@ -70,8 +70,11 @@ class MMDCVAE(Network):
 
         self.init_w = keras.initializers.glorot_normal()
         self.regularizer = keras.regularizers.l1_l2(self.lambda_l1, self.lambda_l2)
-        self._create_network()
-        self._loss_function()
+
+        self.aux_models = {}
+
+        self.__create_network()
+        self._calculate_loss()
 
         self.encoder_model.summary()
         self.decoder_model.summary()
@@ -123,8 +126,8 @@ class MMDCVAE(Network):
         zy = concatenate([self.z, self.decoder_labels], axis=1)
         h = Dense(128, kernel_initializer=self.init_w, kernel_regularizer=self.regularizer, use_bias=False)(zy)
         h = BatchNormalization(axis=1, scale=True)(h)
-        h = LeakyReLU(name="mmd")(h)
-        h = Dropout(self.dr_rate)(h)
+        h_mmd = LeakyReLU(name="mmd")(h)
+        h = Dropout(self.dr_rate)(h_mmd)
         h = Dense(800, kernel_initializer=self.init_w, kernel_regularizer=self.regularizer, use_bias=False)(h)
         h = BatchNormalization(axis=1, scale=True)(h)
         h = LeakyReLU()(h)
@@ -138,8 +141,10 @@ class MMDCVAE(Network):
         h = ACTIVATIONS[self.output_activation](h)
 
         decoder_model = Model(inputs=[self.z, self.decoder_labels], outputs=h, name=name)
-        decoder_mmd_model = Model(inputs=[self.z, self.decoder_labels], outputs=self.z, name='decoder_mmd')
-        return decoder_model, decoder_mmd_model
+        decoder_z_model = Model(inputs=[self.z, self.decoder_labels], outputs=self.z, name='decoder_z')
+        self.aux_models['mmd'] = Model(inputs=[self.z, self.decoder_labels], outputs=h_mmd, name='decoder_mmd')
+
+        return decoder_model, decoder_z_model
 
     def __create_network(self):
         """
@@ -230,7 +235,13 @@ class MMDCVAE(Network):
                 latent: numpy nd-array
                     returns array containing latent space encoding of 'data'
         """
-        return self.to_latent(adata, encoder_labels)
+        adata = remove_sparsity(adata)
+
+        mmd_latent = self.aux_models['mmd'].predict([adata.X, encoder_labels])
+        mmd_adata = anndata.AnnData(X=mmd_latent)
+        mmd_adata.obs = adata.obs(deep=True)
+
+        return mmd_adata
 
     def predict(self, adata, encoder_labels, decoder_labels):
         """
