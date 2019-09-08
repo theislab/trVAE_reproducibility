@@ -1,4 +1,5 @@
-from utils import *
+import numpy as np
+
 
 class Loader(object):
     """A loader class designed to help provide batches one at a time in random order during training, or in the same order all at once when evaluating results."""
@@ -70,4 +71,3 @@ class Loader(object):
         for i, j in enumerate(self.r):
             data_out[j] = data[i]
         return data_out
-
