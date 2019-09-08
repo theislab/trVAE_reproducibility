@@ -1,10 +1,12 @@
-import os
 import logging
+import os
+
+import anndata
 import tensorflow
 from scipy import sparse
 
 from reptrvae.models._network import Network
-from reptrvae.utils import label_encoder
+from reptrvae.utils import label_encoder, remove_sparsity
 
 log = logging.getLogger(__file__)
 
@@ -99,7 +101,8 @@ class CVAE(Network):
             h = tensorflow.layers.dense(inputs=xy, units=400, kernel_initializer=self.init_w, use_bias=False)
             h = tensorflow.layers.batch_normalization(h, axis=1, training=self.is_training)
             h_mmd = tensorflow.nn.leaky_relu(h)
-            h = tensorflow.layers.dense(inputs=h_mmd, units=700, kernel_initializer=self.init_w, use_bias=False)
+            h = tensorflow.layers.dropout(h_mmd, self.dr_rate, training=self.is_training)
+            h = tensorflow.layers.dense(inputs=h, units=700, kernel_initializer=self.init_w, use_bias=False)
             h = tensorflow.layers.batch_normalization(h, axis=1, training=self.is_training)
             h = tensorflow.nn.leaky_relu(h)
             h = tensorflow.layers.dropout(h, self.dr_rate, training=self.is_training)
@@ -177,7 +180,7 @@ class CVAE(Network):
         with tensorflow.control_dependencies(tensorflow.get_collection(tensorflow.GraphKeys.UPDATE_OPS)):
             self.solver = tensorflow.train.AdamOptimizer(learning_rate=self.lr).minimize(self.vae_loss)
 
-    def to_latent(self, data, labels):
+    def to_latent(self, adata, labels):
         """
             Map `data` in to the latent space. This function will feed data
             in encoder part of C-VAE and compute the latent space coordinates
@@ -191,56 +194,38 @@ class CVAE(Network):
                 latent: numpy nd-array
                     returns array containing latent space encoding of 'data'
         """
-        if sparse.issparse(data):
-            data = data.A
-        latent = self.sess.run(self.z_mean, feed_dict={self.x: data, self.y: labels,
-                                                       self.size: data.shape[0], self.is_training: False})
-        return latent
+        adata = remove_sparsity(adata)
 
-    def to_mmd_layer(self, data, labels):
+        latent = self.sess.run(self.z_mean, feed_dict={self.x: adata.X, self.y: labels,
+                                                       self.size: adata.shape[0], self.is_training: False})
+        latent_adata = anndata.AnnData(X=latent)
+        latent_adata.obs = adata.obs(deep=True)
+
+        return latent_adata
+
+    def to_mmd_layer(self, adata, labels):
         """
-                    Map `data` in to the pn layer after latent layer. This function will feed data
-                    in encoder part of C-VAE and compute the latent space coordinates
-                    for each sample in data.
-                    # Parameters
-                        data: `~anndata.AnnData`
-                            Annotated data matrix to be mapped to latent space. `data.X` has to be in shape [n_obs, n_vars].
-                        labels: numpy nd-array
-                            `numpy nd-array` of labels to be fed as CVAE's condition array.
-                    # Returns
-                        latent: numpy nd-array
-                            returns array containing latent space encoding of 'data'
-                """
-
-        latent = self.sess.run(self.mmd_hl,  feed_dict={self.x: data, self.y: labels,
-                                                        self.size: data.shape[0], self.is_training: False})
-        return latent
-
-    def _reconstruct(self, data, labels, use_data=False):
-        """
-            Map back the latent space encoding via the decoder.
+            Map `data` in to the pn layer after latent layer. This function will feed data
+            in encoder part of C-VAE and compute the latent space coordinates
+            for each sample in data.
             # Parameters
                 data: `~anndata.AnnData`
-                    Annotated data matrix whether in latent space or primary space.
+                    Annotated data matrix to be mapped to latent space. `data.X` has to be in shape [n_obs, n_vars].
                 labels: numpy nd-array
                     `numpy nd-array` of labels to be fed as CVAE's condition array.
-                use_data: bool
-                    this flag determines whether the `data` is already in latent space or not.
-                    if `True`: The `data` is in latent space (`data.X` is in shape [n_obs, z_dim]).
-                    if `False`: The `data` is not in latent space (`data.X` is in shape [n_obs, n_vars]).
             # Returns
-                rec_data: 'numpy nd-array'
-                    returns 'numpy nd-array` containing reconstructed 'data' in shape [n_obs, n_vars].
+                latent: numpy nd-array
+                    returns array containing latent space encoding of 'data'
         """
-        if use_data:
-            latent = data
-        else:
-            latent = self.to_latent(data, labels)
-        rec_data = self.sess.run(self.x_hat, feed_dict={self.z_mean: latent, self.y: labels.reshape(-1, 1),
-                                                        self.is_training: False})
-        return rec_data
+        adata = remove_sparsity(adata)
+        mmd_latent = self.sess.run(self.mmd_hl, feed_dict={self.x: adata.X, self.y: labels,
+                                                           self.size: adata.shape[0], self.is_training: False})
+        mmd_adata = anndata.AnnData(X=mmd_latent)
+        mmd_adata.obs = adata.obs(deep=True)
 
-    def predict(self, data, labels):
+        return mmd_adata
+
+    def predict(self, adata, labels):
         """
             Predicts the cell type provided by the user in stimulated condition.
             # Parameters
@@ -262,11 +247,17 @@ class CVAE(Network):
             prediction = network.predict('CD4T', obs_key={"cell_type": ["CD8T", "NK"]})
             ```
         """
-        if sparse.issparse(data.X):
-            stim_pred = self._reconstruct(data.X.A, labels)
-        else:
-            stim_pred = self._reconstruct(data.X, labels)
-        return stim_pred
+        adata = remove_sparsity(adata)
+        latent = self.sess.run(self.z_mean, feed_dict={self.x: adata.X, self.y: labels,
+                                                       self.size: adata.shape[0], self.is_training: False})
+
+        reconstructed = self.sess.run(self.x_hat, feed_dict={self.z_mean: latent, self.y: labels.reshape(-1, 1),
+                                                        self.is_training: False})
+
+        reconstructed_adata = anndata.AnnData(X=reconstructed)
+        reconstructed_adata.obs = adata.obs(deep=True)
+        reconstructed_adata.var_names = adata.var_names
+        return reconstructed_adata
 
     def restore_model(self):
         """
