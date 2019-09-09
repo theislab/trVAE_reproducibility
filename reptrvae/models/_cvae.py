@@ -199,7 +199,7 @@ class CVAE(Network):
         latent = self.sess.run(self.z_mean, feed_dict={self.x: adata.X, self.y: labels,
                                                        self.size: adata.shape[0], self.is_training: False})
         latent_adata = anndata.AnnData(X=latent)
-        latent_adata.obs = adata.obs(deep=True)
+        latent_adata.obs = adata.obs.copy(deep=True)
 
         return latent_adata
 
@@ -221,7 +221,7 @@ class CVAE(Network):
         mmd_latent = self.sess.run(self.mmd_hl, feed_dict={self.x: adata.X, self.y: labels,
                                                            self.size: adata.shape[0], self.is_training: False})
         mmd_adata = anndata.AnnData(X=mmd_latent)
-        mmd_adata.obs = adata.obs(deep=True)
+        mmd_adata.obs = adata.obs.copy(deep=True)
 
         return mmd_adata
 
