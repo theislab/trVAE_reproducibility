@@ -114,8 +114,8 @@ class scGen:
         """
         h = Dense(800, kernel_initializer=self.init_w, use_bias=False)(self.z)
         h = BatchNormalization(axis=1)(h)
-        h_mmd = LeakyReLU()(h_mmd)
-        h = Dropout(self.dropout_rate)(h)
+        h_mmd = LeakyReLU()(h)
+        h = Dropout(self.dropout_rate)(h_mmd)
         h = Dense(800, kernel_initializer=self.init_w, use_bias=False)(h)
         h = BatchNormalization(axis=1)(h)
         h = LeakyReLU()(h)
