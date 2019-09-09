@@ -55,7 +55,7 @@ class scVI(Network):
 
         posterior = self.trainer.create_posterior(self.trainer.model, net_adata, indices=np.arange(len(net_adata)))
 
-        latent, _, __ = posterior.sequential().get_mmd()
+        latent, _, __ = posterior.sequential().get_latent()
 
         latent_adata = sc.AnnData(X=latent)
         latent_adata.obs = adata.obs.copy(deep=True)

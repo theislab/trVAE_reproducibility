@@ -79,7 +79,7 @@ pred_adata.write(f"../data/reconstructed/{data_name}/CVAE-{specific_cell_type}.h
 print("Model has been trained")
 sc.settings.figdir = f"../results/{data_name}/"
 labels, _ = label_encoder(adata, condition_key=condition_key)
-
+labels = np.ones_like(labels)
 latent_adata = network.to_latent(adata, labels)
 mmd_latent_adata = network.to_mmd_layer(adata, labels)
 
