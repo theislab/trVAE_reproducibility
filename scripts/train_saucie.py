@@ -63,8 +63,7 @@ cell_type_adata = adata[adata.obs[cell_type_key] == specific_celltype]
 net_train_adata = train_adata[
     ~((train_adata.obs[cell_type_key] == specific_celltype) & (train_adata.obs[condition_key].isin(target_conditions)))]
 
-model = SAUCIE(x_dimension=net_train_adata.shape[1], lambda_b=1.0, lambda_c=1.0, layer_c=0, lambda_d=1.0,
-               layers=[800, 800, 128, 40])
+model = SAUCIE(x_dimension=net_train_adata.shape[1], lambda_b=0.2, lambda_c=0.0, layer_c=0, lambda_d=0.0)
 
 model.train(net_train_adata, condition_key=condition_key, le=labelencoder, n_epochs=1000, batch_size=256)
 labels = np.ones_like(adata.obs[condition_key].values)
