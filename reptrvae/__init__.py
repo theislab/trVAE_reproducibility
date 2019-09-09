@@ -2,7 +2,7 @@
 
 from . import utils as tl
 from . import models
-from . import scripts
+from . import plotting as pl
 
 __author__ = ', '.join([
     'Mohsen Naghipourfar',
