@@ -71,6 +71,7 @@ class SAUCIE(Network):
 
         x_train = train_adata.X
         y_train, _ = label_encoder(train_adata, le, condition_key)
+        y_train = np.reshape(y_train, (-1,))
 
         train_loader = Loader(x_train, labels=y_train, shuffle=True)
 
