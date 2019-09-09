@@ -198,13 +198,16 @@ class scGen:
         self.vae_model.compile(optimizer=self.vae_optimizer, loss=vae_loss, metrics=[kl_loss, recon_loss])
 
     def to_latent(self, adata):
-        adata = remove_sparsity(adata)
+        if isinstance(adata, anndata.AnnData):
+            adata = remove_sparsity(adata)
 
-        latent = self.encoder_model.predict(adata.X)
-        latent_adata = anndata.AnnData(X=latent)
-        latent_adata.obs = adata.obs.copy(deep=True)
+            latent = self.encoder_model.predict(adata.X)
+            latent_adata = anndata.AnnData(X=latent)
+            latent_adata.obs = adata.obs.copy(deep=True)
 
-        return latent_adata
+            return latent_adata
+        else:
+            return self.encoder_model.predict(adata)
 
     def to_mmd_layer(self, adata):
         adata = remove_sparsity(adata)
