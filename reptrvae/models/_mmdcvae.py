@@ -239,7 +239,7 @@ class MMDCVAE(Network):
 
         encoder_labels = to_categorical(encoder_labels, num_classes=self.n_conditions)
 
-        latent = self.encoder_model.predict([adata.X, encoder_labels])
+        latent = self.encoder_model.predict([adata.X, encoder_labels])[2]
 
         mmd_latent = self.aux_models['mmd'].predict([latent, encoder_labels])
         mmd_adata = anndata.AnnData(X=mmd_latent)
