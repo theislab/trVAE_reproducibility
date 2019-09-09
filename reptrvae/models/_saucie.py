@@ -30,7 +30,7 @@ class SAUCIE(Network):
         data_loader = Loader(data=adata.X, labels=labels, shuffle=False)
 
         latent = self.model_backend.get_embedding(data_loader)
-        latent_adata = anndata.AnnData(X=latent)
+        latent_adata = anndata.AnnData(X=latent[0])
         latent_adata.obs = adata.obs.copy(deep=True)
         return latent_adata
 
@@ -43,7 +43,7 @@ class SAUCIE(Network):
         data_loader = Loader(data=adata.X, labels=labels, shuffle=False)
 
         latent = self.model_backend.get_layer(data_loader, 'mmd')
-        latent_adata = anndata.AnnData(X=latent)
+        latent_adata = anndata.AnnData(X=latent[0])
         latent_adata.obs = adata.obs.copy(deep=True)
 
         return latent_adata
