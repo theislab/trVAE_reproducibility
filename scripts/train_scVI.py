@@ -58,6 +58,6 @@ pred_adata = model.predict(net_adata, cell_type_to_predict=specific_celltype, co
                            n_generated_samples=50)
 
 reptrvae.pl.plot_umap(latent_adata, condition_key=condition_key, cell_type_key=cell_type_key, frameon=False,
-                      path_to_save=f"./results/{data_name}/", model_name="scVI")
+                      path_to_save=f"./results/{data_name}/", model_name="scVI_latent")
 
 pred_adata.write_h5ad(f"./data/reconstructed/{data_name}/scVI-{specific_celltype}.h5ad")
