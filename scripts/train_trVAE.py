@@ -64,8 +64,8 @@ network.train(net_train_adata,
               n_epochs=10000,
               batch_size=512,
               verbose=2,
-              early_stop_limit=100,
-              lr_reducer=75,
+              early_stop_limit=500,
+              lr_reducer=350,
               shuffle=True,
               )
 
