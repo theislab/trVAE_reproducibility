@@ -186,10 +186,10 @@ class scGen:
         """
 
         def vae_loss(y_true, y_pred):
-            return K.mean(recon_loss(y_true, y_pred) + self.alpha * kl_loss(y_true, y_pred))
+            return K.mean(recon_loss(y_true, y_pred) + kl_loss(y_true, y_pred))
 
         def kl_loss(y_true, y_pred):
-            return 0.5 * K.sum(K.exp(self.log_var) + K.square(self.mu) - 1. - self.log_var, axis=1)
+            return self.alpha * (0.5 * K.sum(K.exp(self.log_var) + K.square(self.mu) - 1. - self.log_var, axis=1))
 
         def recon_loss(y_true, y_pred):
             return 0.5 * K.sum(K.square((y_true - y_pred)), axis=1)
