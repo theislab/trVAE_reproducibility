@@ -70,7 +70,7 @@ class SAUCIE(Network):
         train_adata = remove_sparsity(train_adata)
 
         x_train = train_adata.X
-        y_train = label_encoder(train_adata, le, condition_key)
+        y_train, _ = label_encoder(train_adata, le, condition_key)
 
         train_loader = Loader(x_train, labels=y_train, shuffle=True)
 
