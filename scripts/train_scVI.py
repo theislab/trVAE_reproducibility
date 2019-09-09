@@ -40,9 +40,6 @@ adata.X = np.array(adata.X, dtype='int32')
 
 net_adata = adata[
     ~((adata.obs[cell_type_key] == specific_celltype) & (adata.obs[condition_key].isin(target_conditions)))]
-cell_type_adata = adata[adata.obs[cell_type_key] == specific_celltype]
-ctrl_adata = cell_type_adata[cell_type_adata.obs[condition_key].isin(source_conditions)]
-real_adata = cell_type_adata[cell_type_adata.obs[condition_key].isin(target_conditions)]
 
 n_batches = len(net_adata.obs[condition_key].unique().tolist())
 
