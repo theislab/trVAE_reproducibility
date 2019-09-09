@@ -45,13 +45,13 @@ n_batches = len(net_adata.obs[condition_key].unique().tolist())
 
 model = scVI(x_dimension=net_adata.shape[1], n_batches=n_batches, model_path="./models/")
 
-model.train(net_adata, condition_key=condition_key, cell_type_key=cell_type_key, n_epochs=1000, patience=50,
+model.train(net_adata, condition_key=condition_key, cell_type_key=cell_type_key, n_epochs=1, patience=50,
             lr_reducer=40)
 
-model.save_model()
+# model.save_model()
 
-latent_adata = model.to_latent(net_adata, condition_key=condition_key, cell_type_key=cell_type_key)
-
+latent_adata = model.to_mmd_layer(net_adata, condition_key=condition_key, cell_type_key=cell_type_key)
+exit()
 pred_adata = model.predict(net_adata, cell_type_to_predict=specific_celltype, condition_key=condition_key,
                            cell_type_key=cell_type_key,
                            target_condition=target_conditions[0], source_condition=source_conditions[0],
