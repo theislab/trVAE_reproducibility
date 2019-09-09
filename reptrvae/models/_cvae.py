@@ -243,7 +243,7 @@ class CVAE(Network):
             train_data = sc.read("train_kang.h5ad")
             validation_data = sc.read("./data/validation.h5ad")
             network = scgen.CVAE(train_data=train_data, use_validation=True, validation_data=validation_data, model_path="./saved_models/", conditions={"ctrl": "control", "stim": "stimulated"})
-            network.train(n_epochs=20)
+            network.scripts(n_epochs=20)
             prediction = network.predict('CD4T', obs_key={"cell_type": ["CD8T", "NK"]})
             ```
         """
@@ -310,7 +310,7 @@ class CVAE(Network):
             import scgen
             train_data = sc.read(train_katrain_kang.h5ad           >>> validation_data = sc.read(valid_kang.h5ad)
             network = scgen.CVAE(train_data=train_data, use_validation=True, validation_data=validation_data, model_path="./saved_models/", conditions={"ctrl": "control", "stim": "stimulated"})
-            network.train(n_epochs=20)
+            network.scripts(n_epochs=20)
             ```
         """
         if initial_run:

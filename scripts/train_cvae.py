@@ -84,7 +84,7 @@ network = CVAE(x_dimension=net_train_adata.X.shape[1],
                z_dimension=z_dim,
                alpha=0.1,
                model_path=f"../models/CVAE/{data_name}/{specific_cell_type}/cvae")
-if sys.argv[2] == 'train':
+if sys.argv[2] == 'scripts':
     network.train(net_train_adata,
                   use_validation=True,
                   valid_data=net_valid_adata,

@@ -2,7 +2,7 @@
 
 from . import utils as tl
 from . import models
-from . import train
+from . import scripts
 
 __author__ = ', '.join([
     'Mohsen Naghipourfar',

@@ -1,7 +1,10 @@
-from utils import *
+import numpy as np
 import sklearn.metrics
 import tensorflow as tf
 import os
+
+from reptrvae.utils import tbn, lrelu, obn, calculate_mmd
+
 
 def nameop(op, name):
     """
@@ -388,8 +391,8 @@ class SAUCIE_BACKEND(object):
         Train SAUCIE.
 
         :param load: the loader object to yield batches from
-        :param steps: the number of steps to train for
-        :param batch_size: the number of points to train on in each step
+        :param steps: the number of steps to scripts for
+        :param batch_size: the number of points to scripts on in each step
         """
         start = self.iteration
         while (self.iteration - start) < steps:

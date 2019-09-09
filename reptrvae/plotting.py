@@ -42,14 +42,14 @@ def reg_mean_plot(adata, condition_key, axis_keys, labels, path_to_save="./reg_m
         import anndata
         import scgen
         import scanpy as sc
-        train = sc.read("./tests/data/train.h5ad", backup_url="https://goo.gl/33HtVh")
-        network = scgen.VAEArith(x_dimension=train.shape[1], model_path="../models/test")
-        network.train(train_data=train, n_epochs=0)
-        unperturbed_data = train[((train.obs["cell_type"] == "CD4T") & (train.obs["condition"] == "control"))]
+        scripts = sc.read("./tests/data/scripts.h5ad", backup_url="https://goo.gl/33HtVh")
+        network = scgen.VAEArith(x_dimension=scripts.shape[1], model_path="../models/test")
+        network.scripts(train_data=scripts, n_epochs=0)
+        unperturbed_data = scripts[((scripts.obs["cell_type"] == "CD4T") & (scripts.obs["condition"] == "control"))]
         condition = {"ctrl": "control", "stim": "stimulated"}
-        pred, delta = network.predict(adata=train, adata_to_predict=unperturbed_data, conditions=condition)
-        pred_adata = anndata.AnnData(pred, obs={"condition": ["pred"] * len(pred)}, var={"var_names": train.var_names})
-        CD4T = train[train.obs["cell_type"] == "CD4T"]
+        pred, delta = network.predict(adata=scripts, adata_to_predict=unperturbed_data, conditions=condition)
+        pred_adata = anndata.AnnData(pred, obs={"condition": ["pred"] * len(pred)}, var={"var_names": scripts.var_names})
+        CD4T = scripts[scripts.obs["cell_type"] == "CD4T"]
         all_adata = CD4T.concatenate(pred_adata)
         scgen.plotting.reg_mean_plot(all_adata, condition_key="condition", axis_keys={"x": "control", "y": "pred", "y1": "stimulated"},
                                      gene_list=["ISG15", "CD3D"], path_to_save="tests/reg_mean.pdf", show=False)
@@ -119,7 +119,8 @@ def reg_mean_plot(adata, condition_key, axis_keys, labels, path_to_save="./reg_m
             fontsize=kwargs.get("textsize", fontsize))
     if diff_genes is not None:
         ax.text(max(x) - max(x) * x_coeff, max(y) - (y_coeff + 0.15) * max(y),
-                r'$\mathrm{R^2_{\mathrm{\mathsf{top\ ' + str(len(top_100_genes)) + '\ DEGs}}}}$= ' + f"{r_value_diff ** 2:.2f}",
+                r'$\mathrm{R^2_{\mathrm{\mathsf{top\ ' + str(
+                    len(top_100_genes)) + '\ DEGs}}}}$= ' + f"{r_value_diff ** 2:.2f}",
                 fontsize=kwargs.get("textsize", fontsize))
     pyplot.savefig(f"{path_to_save}", bbox_inches='tight', dpi=100)
     if show:
@@ -153,14 +154,14 @@ def reg_var_plot(adata, condition_key, axis_keys, labels, path_to_save="./reg_va
         import anndata
         import scgen
         import scanpy as sc
-        train = sc.read("./tests/data/train.h5ad", backup_url="https://goo.gl/33HtVh")
-        network = scgen.VAEArith(x_dimension=train.shape[1], model_path="../models/test")
-        network.train(train_data=train, n_epochs=0)
-        unperturbed_data = train[((train.obs["cell_type"] == "CD4T") & (train.obs["condition"] == "control"))]
+        scripts = sc.read("./tests/data/scripts.h5ad", backup_url="https://goo.gl/33HtVh")
+        network = scgen.VAEArith(x_dimension=scripts.shape[1], model_path="../models/test")
+        network.scripts(train_data=scripts, n_epochs=0)
+        unperturbed_data = scripts[((scripts.obs["cell_type"] == "CD4T") & (scripts.obs["condition"] == "control"))]
         condition = {"ctrl": "control", "stim": "stimulated"}
-        pred, delta = network.predict(adata=train, adata_to_predict=unperturbed_data, conditions=condition)
-        pred_adata = anndata.AnnData(pred, obs={"condition": ["pred"] * len(pred)}, var={"var_names": train.var_names})
-        CD4T = train[train.obs["cell_type"] == "CD4T"]
+        pred, delta = network.predict(adata=scripts, adata_to_predict=unperturbed_data, conditions=condition)
+        pred_adata = anndata.AnnData(pred, obs={"condition": ["pred"] * len(pred)}, var={"var_names": scripts.var_names})
+        CD4T = scripts[scripts.obs["cell_type"] == "CD4T"]
         all_adata = CD4T.concatenate(pred_adata)
         scgen.plotting.reg_var_plot(all_adata, condition_key="condition", axis_keys={"x": "control", "y": "pred", "y1": "stimulated"},
                                     gene_list=["ISG15", "CD3D"], path_to_save="tests/reg_var4.pdf", show=False)
@@ -227,7 +228,8 @@ def reg_var_plot(adata, condition_key, axis_keys, labels, path_to_save="./reg_va
             fontsize=kwargs.get("textsize", fontsize))
     if diff_genes is not None:
         ax.text(max(x) - max(x) * x_coeff, max(y) - (y_coeff + 0.15) * max(y),
-                r'$\mathrm{R^2_{\mathrm{\mathsf{top\ ' + str(len(top_100_genes)) + '\ DEGs}}}}$= ' + f"{r_value_diff ** 2:.2f}",
+                r'$\mathrm{R^2_{\mathrm{\mathsf{top\ ' + str(
+                    len(top_100_genes)) + '\ DEGs}}}}$= ' + f"{r_value_diff ** 2:.2f}",
                 fontsize=kwargs.get("textsize", fontsize))
     pyplot.savefig(f"{path_to_save}", bbox_inches='tight', dpi=100)
     if show:
@@ -235,69 +237,18 @@ def reg_var_plot(adata, condition_key, axis_keys, labels, path_to_save="./reg_va
     pyplot.close()
 
 
-def binary_classifier(scg_object, adata, delta, condition_key, conditions, path_to_save, fontsize=14):
-    """
-        Builds a linear classifier based on the dot product between
-        the difference vector and the latent representation of each
-        cell and plots the dot product results between delta and latent
-        representation.
+def plot_umap(adata, condition_key=None, cell_type_key=None, frameon=False, path_to_save=None, model_name=""):
+    if cell_type_key is None and condition_key is None:
+        raise Exception('at least one of cell_type_key or condition_key has to be set')
 
-        # Parameters
-            scg_object: `~scgen.models.VAEArith`
-                one of scGen models object.
-            adata: `~anndata.AnnData`
-                Annotated Data Matrix.
-            delta: float
-                Difference between stimulated and control cells in latent space
-            condition_key: basestring
-                Condition state to be used.
-            conditions: dict
-                dictionary of conditions.
-            path_to_save: basestring
-                path to save the plot.
+    last_figdir = sc.settings.figdir
+    sc.settings.figdir = path_to_save
+    sc.pp.neighbors(adata)
+    sc.tl.umap(adata)
 
-        # Example
-        ```python
-        import anndata
-        import scgen
-        import scanpy as sc
-        train = sc.read("./tests/data/train.h5ad", backup_url="https://goo.gl/33HtVh")
-        network = scgen.VAEArith(x_dimension=train.shape[1], model_path="../models/test")
-        network.train(train_data=train, n_epochs=0)
-        unperturbed_data = train[((train.obs["cell_type"] == "CD4T") & (train.obs["condition"] == "control"))]
-        condition = {"ctrl": "control", "stim": "stimulated"}
-        pred, delta = network.predict(adata=train, adata_to_predict=unperturbed_data, conditions=condition)
-        scgen.plotting.binary_classifier(network, train, delta, condtion_key="condition",
-                                         conditions={"ctrl": "control", "stim": "stimulated"},
-                                         path_to_save="tests/binary_classifier.pdf")
-        network.sess.close()
-        ```
+    if condition_key:
+        sc.pl.umap(adata, color=condition_key, frameon=frameon, save=f"_{model_name}_condition.pdf")
+    if cell_type_key:
+        sc.pl.umap(adata, color=cell_type_key, frameon=frameon, save=f"_{model_name}_cell_type.pdf")
 
-        """
-    # matplotlib.rcParams.update(matplotlib.rcParamsDefault)
-    pyplot.close("all")
-    if sparse.issparse(adata.X):
-        adata.X = adata.X.A
-    cd = adata[adata.obs[condition_key] == conditions["ctrl"], :]
-    stim = adata[adata.obs[condition_key] == conditions["stim"], :]
-    all_latent_cd = scg_object.to_latent(cd.X, )
-    all_latent_stim = scg_object.to_latent(stim.X, )
-    dot_cd = numpy.zeros((len(all_latent_cd)))
-    dot_sal = numpy.zeros((len(all_latent_stim)))
-    for ind, vec in enumerate(all_latent_cd):
-        dot_cd[ind] = numpy.dot(delta, vec)
-    for ind, vec in enumerate(all_latent_stim):
-        dot_sal[ind] = numpy.dot(delta, vec)
-    pyplot.hist(dot_cd, label=conditions["ctrl"], bins=50, )
-    pyplot.hist(dot_sal, label=conditions["stim"], bins=50)
-    # pyplot.legend(loc=1, prop={'size': 7})
-    pyplot.axvline(0, color='k', linestyle='dashed', linewidth=1)
-    pyplot.title("  ", fontsize=fontsize)
-    pyplot.xlabel("  ", fontsize=fontsize)
-    pyplot.ylabel("  ", fontsize=fontsize)
-    pyplot.xticks(fontsize=fontsize)
-    pyplot.yticks(fontsize=fontsize)
-    ax = pyplot.gca()
-    ax.grid(False)
-    pyplot.savefig(f"{path_to_save}", bbox_inches='tight', dpi=100)
-    pyplot.show()
+    sc.settings.figdir = last_figdir

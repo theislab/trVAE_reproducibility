@@ -102,7 +102,7 @@ def train_batch_correction(rawfiles):
         ref = rawfiles[0]
         refx = get_data(ref)
 
-        print("Starting to train {} batch correction models...".format(len(rawfiles[1:])))
+        print("Starting to scripts {} batch correction models...".format(len(rawfiles[1:])))
         for counter, nonref in enumerate(rawfiles[1:]):
             nonrefname = os.path.split(nonref)[-1]
             print("Training model {}".format(counter))
@@ -292,7 +292,7 @@ def parse_args():
     parser.add_argument('--lambda_c', default=.1, type=float, help='if clustering, the value of lambda_c')
     parser.add_argument('--lambda_d', default=.2, type=float, help='if clustering, the value of lambda_d')
     parser.add_argument('--lambda_b', default=.1, type=float, help='if batch correcting, the value of lambda_b')
-    parser.add_argument('--num_iterations', default=10, type=int, help='number of iterations to train (in thousands)')
+    parser.add_argument('--num_iterations', default=10, type=int, help='number of iterations to scripts (in thousands)')
     parser.add_argument('--batch_size', default=100, type=int, help='number of rows in each SGD minibatch')
     parser.add_argument('--num_points_sample', default=1000, type=int, 
         help='''when loading data into memory, number of points to sample from each file. if all of the data from all files fits into
