@@ -67,8 +67,8 @@ model = SAUCIE(x_dimension=net_train_adata.shape[1], lambda_b=1.0, lambda_c=1.0,
                layers=[800, 800, 128, 40])
 
 model.train(net_train_adata, condition_key=condition_key, le=labelencoder, n_epochs=1000, batch_size=256)
-
-mmd_adata = model.to_mmd_layer(net_train_adata, condition_key)
+labels = np.ones_like(adata.obs[condition_key].values)
+mmd_adata = model.to_latent(net_train_adata, labels)
 
 pred_adata = model.predict(net_train_adata, labelencoder[target_condition], condition_key, cell_type_key,
                            specific_celltype,

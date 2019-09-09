@@ -56,7 +56,7 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
         network.train(net_train_adata, use_validation=True, valid_data=net_valid_adata, n_epochs=n_epochs,
                       batch_size=batch_size, save=True,
                       verbose=2, early_stop_limit=5)
-        mmd_adata = network.to_mmd_layer(net_train_adata)
+        mmd_adata = network.to_latent(net_train_adata)
         plot_umap(mmd_adata, condition_key, cell_type_key, False,
                   path_to_save=f"./results/{data_name}/", model_name="scGen_MMD")
         print(f"network_{cell_type} has been trained!")

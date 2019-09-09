@@ -21,11 +21,8 @@ class SAUCIE(Network):
     def __compile_network(self):
         pass
 
-    def to_latent(self, adata, condition_key):
+    def to_latent(self, adata, labels):
         adata = remove_sparsity(adata)
-
-        le = LabelEncoder()
-        labels = le.fit_transform(adata.obs[condition_key].values)
 
         data_loader = Loader(data=adata.X, labels=labels, shuffle=False)
 
@@ -36,11 +33,8 @@ class SAUCIE(Network):
         latent_adata.obs = adata.obs.copy(deep=True)
         return latent_adata
 
-    def to_mmd_layer(self, adata, condition_key):
+    def to_mmd_layer(self, adata, labels):
         adata = remove_sparsity(adata)
-
-        le = LabelEncoder()
-        labels = le.fit_transform(adata.obs[condition_key].values)
 
         data_loader = Loader(data=adata.X, labels=labels, shuffle=False)
 

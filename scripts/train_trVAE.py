@@ -70,6 +70,7 @@ network.train(net_train_adata,
               )
 
 train_labels, _ = reptrvae.tl.label_encoder(net_train_adata, labelencoder, condition_key)
+train_labels = np.ones_like(train_labels)
 mmd_adata = network.to_mmd_layer(net_train_adata, train_labels)
 
 source_adata = adata[adata.obs[condition_key] == source_condition]
