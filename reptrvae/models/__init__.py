@@ -3,12 +3,14 @@ from ._trvae import trVAE
 from ._mmdcvae import MMDCVAE
 from ._cycle_gan import CycleGAN
 from ._saucie import SAUCIE_BACKEND
+from ._scgen import scGen
 
 MODELS = {
     "CycleGAN": CycleGAN,
     "CVAE": CVAE,
     "MMDCVAE": MMDCVAE,
     "trVAE": trVAE,
-    "SAUCIE": SAUCIE_BACKEND
+    "SAUCIE": SAUCIE_BACKEND,
+    "scGen": scGen,
 }
 

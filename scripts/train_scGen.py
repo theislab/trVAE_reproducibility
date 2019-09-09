@@ -1,8 +1,9 @@
 import anndata
 import numpy as np
 import scanpy as sc
-import scgen
 from scipy import sparse
+
+from reptrvae.models import scGen
 
 
 def train_test_split(adata, train_frac=0.85):
@@ -53,14 +54,16 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
         if cell_type_to_train is not None and cell_type != cell_type_to_train:
             continue
         print(f"Training for {cell_type}")
-        net_train_adata = train_adata[~((train_adata.obs[cell_type_key] == cell_type) & (train_adata.obs[condition_key].isin(stim_keys)))]
-        net_valid_adata = valid_adata[~((valid_adata.obs[cell_type_key] == cell_type) & (valid_adata.obs[condition_key].isin(stim_keys)))]
-        network = scgen.VAEArith(x_dimension=net_train_adata.X.shape[1],
-                                 z_dimension=z_dim,
-                                 alpha=alpha,
-                                 dropout_rate=dropout_rate,
-                                 learning_rate=learning_rate,
-                                 model_path=f"../models/scGen/{data_name}/{cell_type}/scgen")
+        net_train_adata = train_adata[
+            ~((train_adata.obs[cell_type_key] == cell_type) & (train_adata.obs[condition_key].isin(stim_keys)))]
+        net_valid_adata = valid_adata[
+            ~((valid_adata.obs[cell_type_key] == cell_type) & (valid_adata.obs[condition_key].isin(stim_keys)))]
+        network = scGen(x_dimension=net_train_adata.X.shape[1],
+                        z_dimension=z_dim,
+                        alpha=alpha,
+                        dropout_rate=dropout_rate,
+                        learning_rate=learning_rate,
+                        model_path=f"../models/scGen/{data_name}/{cell_type}/scgen")
 
         network.train(net_train_adata, use_validation=True, valid_data=net_valid_adata, n_epochs=n_epochs,
                       batch_size=batch_size, save=True,
@@ -98,12 +101,12 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
         if cell_type_to_predict is not None and cell_type != cell_type_to_predict:
             continue
         print(f"Reconstructing for {cell_type}")
-        network = scgen.VAEArith(x_dimension=adata.X.shape[1],
-                                 z_dimension=100,
-                                 alpha=0.00005,
-                                 dropout_rate=0.2,
-                                 learning_rate=0.001,
-                                 model_path=f"../models/scGen/{data_name}/{cell_type}/scgen")
+        network = scGen(x_dimension=adata.X.shape[1],
+                        z_dimension=100,
+                        alpha=0.00005,
+                        dropout_rate=0.2,
+                        learning_rate=0.001,
+                        model_path=f"../models/scGen/{data_name}/{cell_type}/scgen")
         network.restore_model()
 
         cell_type_data = adata[adata.obs[cell_type_key] == cell_type]
@@ -142,6 +145,7 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
 
 if __name__ == '__main__':
     import sys
+
     data_name = sys.argv[1]
 
     if data_name == "haber":
@@ -150,6 +154,8 @@ if __name__ == '__main__':
         specific_cell_type = "NK"
     elif data_name == "species":
         specific_cell_type = "rat"
+    else:
+        raise Exception("Invalid data name!")
 
     test_train_whole_data_one_celltype_out(data_name, z_dim=100, alpha=0.00005, n_epochs=300, batch_size=32,
                                            dropout_rate=0.2, learning_rate=0.001, cell_type_to_train=specific_cell_type)
