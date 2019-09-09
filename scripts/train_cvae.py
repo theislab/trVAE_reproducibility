@@ -61,7 +61,7 @@ elif data_name == "kang":
     control_condition = "CTRL"
     target_condition = "STIM"
     target_conditions = ['STIM']
-    le = {"unst": 0, "STIM": 1}
+    le = {"CTRL": 0, "STIM": 1}
 
 adata = sc.read(f"../data/{data_name}/{data_name}_normalized.h5ad")
 adata = adata.copy()[adata.obs[condition_key].isin(keys)]
