@@ -59,7 +59,6 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
         mmd_adata = network.to_mmd_layer(net_train_adata)
         plot_umap(mmd_adata, condition_key, cell_type_key, False,
                   path_to_save=f"./results/{data_name}/", model_name="scGen_MMD")
-        network.sess.close()
         print(f"network_{cell_type} has been trained!")
 
 
