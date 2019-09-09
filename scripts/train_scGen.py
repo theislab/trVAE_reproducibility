@@ -129,7 +129,6 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
             all_data = all_data.concatenate(ctrl_adata, pred_adata, real_stim_adata)
 
         print(f"Finish Reconstructing for {cell_type}")
-        network.sess.close()
     all_data.write_h5ad(f"../data/reconstructed/{data_name}/scGen-{cell_type_to_predict}.h5ad")
 
 
