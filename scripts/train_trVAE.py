@@ -73,7 +73,8 @@ train_labels, _ = reptrvae.tl.label_encoder(net_train_adata, labelencoder, condi
 train_labels = np.ones_like(train_labels)
 mmd_adata = network.to_mmd_layer(net_train_adata, train_labels)
 
-source_adata = adata[adata.obs[condition_key] == source_condition]
+cell_type_adata = adata[adata.obs[cell_type_key] == specific_celltype]
+source_adata = cell_type_adata[cell_type_adata.obs[condition_key] == source_condition]
 source_labels = np.zeros(source_adata.shape[0]) + labelencoder[source_condition]
 target_labels = np.zeros(source_adata.shape[0]) + labelencoder[target_condition]
 
