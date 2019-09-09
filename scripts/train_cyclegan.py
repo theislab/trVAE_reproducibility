@@ -322,7 +322,7 @@ if __name__ == "__main__":
     print("model has been trained/restored!")
     adata_list = dr.extractor(data, specific_cell_type)
     ctrl_CD4T = adata_list[1]
-    if sys.argv[2] == "scripts":
+    if sys.argv[2] == "train":
         predicted_cells = predict(ctrl_CD4T.X)
         all_Data = sc.AnnData(np.concatenate([adata_list[1].X, adata_list[2].X, predicted_cells]))
         all_Data.obs["condition"] = ["ctrl"] * len(adata_list[1].X) + [f"real_{target_conditions[0]}"] * len(adata_list[2].X) + \
