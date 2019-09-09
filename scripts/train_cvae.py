@@ -72,17 +72,12 @@ cell_type_adata = train_adata[train_adata.obs[cell_type_key] == specific_cell_ty
 
 unperturbed_data = cell_type_adata[cell_type_adata.obs[condition_key] == control_condition]
 target_labels = np.zeros((len(unperturbed_data), 1)) + le[target_condition]
-predicted_cells = network.predict(unperturbed_data, target_labels)
-pred_adata = sc.AnnData(predicted_cells,
-                        obs={condition_key: [f"{specific_cell_type}_pred_{target_condition}"] * len(target_labels)})
+pred_adata = network.predict(unperturbed_data, target_labels)
+pred_adata.obs[condition_key] = [f"{specific_cell_type}_pred_{target_condition}"] * len(target_labels)
 pred_adata.obs['method'] = 'CVAE'
-pred_adata.obs[cell_type_key] = specific_cell_type
-pred_adata.var_names = cell_type_adata.var_names
-all_adata = cell_type_adata.concatenate(pred_adata)
-
-all_adata.write(f"../data/reconstructed/{data_name}/CVAE-{specific_cell_type}.h5ad")
+pred_adata.write(f"../data/reconstructed/{data_name}/CVAE-{specific_cell_type}.h5ad")
 print("Model has been trained")
-sc.settings.figdir = "../results/kang/"
+sc.settings.figdir = f"../results/{data_name}/"
 labels, _ = label_encoder(adata, condition_key=condition_key)
 
 latent_adata = network.to_latent(adata.X, labels)
