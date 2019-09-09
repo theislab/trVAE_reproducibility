@@ -46,6 +46,21 @@ class scVI(Network):
         latent_adata.obs = adata.obs.copy(deep=True)
         return latent_adata
 
+    def to_mmd_layer(self, adata, condition_key, cell_type_key):
+        le = LabelEncoder()
+        adata.obs['labels'] = le.fit_transform(adata.obs[cell_type_key].values)
+        adata.obs['batch_indices'] = le.fit_transform(adata.obs[condition_key].values)
+
+        net_adata = AnnDatasetFromAnnData(adata)
+
+        posterior = self.trainer.create_posterior(self.trainer.model, net_adata, indices=np.arange(len(net_adata)))
+
+        latent, _, __ = posterior.sequential().get_mmd()
+
+        latent_adata = sc.AnnData(X=latent)
+        latent_adata.obs = adata.obs.copy(deep=True)
+        return latent_adata
+
     def predict(self, adata, cell_type_to_predict, condition_key, cell_type_key, target_condition, source_condition,
                 n_generated_samples=50):
         cell_type_adata = adata.copy()[adata.obs[cell_type_key] == cell_type_to_predict]
