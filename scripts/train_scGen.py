@@ -51,7 +51,7 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
                         alpha=alpha,
                         dropout_rate=dropout_rate,
                         learning_rate=learning_rate,
-                        model_path=f"../models/scGen/{data_name}/{cell_type}/scgen")
+                        model_path=f"./models/scGen/{data_name}/{cell_type}/")
 
         network.train(net_train_adata, use_validation=True, valid_data=net_valid_adata, n_epochs=n_epochs,
                       batch_size=batch_size, save=True,
@@ -96,7 +96,7 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
                         alpha=0.00005,
                         dropout_rate=0.2,
                         learning_rate=0.001,
-                        model_path=f"../models/scGen/{data_name}/{cell_type}/scgen")
+                        model_path=f"./models/scGen/{data_name}/{cell_type}/")
         network.restore_model()
 
         cell_type_data = adata[adata.obs[cell_type_key] == cell_type]
