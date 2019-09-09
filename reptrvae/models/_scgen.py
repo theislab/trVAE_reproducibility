@@ -304,6 +304,13 @@ class scGen:
         self.decoder_model = load_model(os.path.join(self.model_to_use, 'decoder.h5'), compile=False)
         self._loss_function()
 
+    def save_model(self):
+        os.makedirs(self.model_to_use, exist_ok=True)
+        self.vae_model.save(os.path.join(self.model_to_use, "vae.h5"), overwrite=True)
+        self.encoder_model.save(os.path.join(self.model_to_use, "encoder.h5"), overwrite=True)
+        self.decoder_model.save(os.path.join(self.model_to_use, "decoder.h5"), overwrite=True)
+        log.info(f"Models are saved in file: {self.model_to_use}. Training finished")
+
     def train(self, train_data, validation_data=None,
               n_epochs=25,
               batch_size=32,
@@ -346,9 +353,5 @@ class scGen:
                                         verbose=verbose)
 
         if save is True:
-            os.makedirs(self.model_to_use, exist_ok=True)
-            self.vae_model.save(os.path.join("vae.h5"), overwrite=True)
-            self.encoder_model.save(os.path.join("encoder.h5"), overwrite=True)
-            self.decoder_model.save(os.path.join("decoder.h5"), overwrite=True)
-            log.info(f"Models are saved in file: {self.model_to_use}. Training finished")
+            self.save_model()
         return result
