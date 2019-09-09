@@ -163,7 +163,7 @@ class SAUCIE_BACKEND(object):
             self.embedded = nameop(self.embedded, 'embeddings')
 
             h5 = tf.layers.dense(self.embedded, self.layers[2], activation=lrelu, name='decoder0')
-
+            h5 = nameop(h5, 'mmd')
             h6 = tf.layers.dense(h5, self.layers[1], activation=lrelu, name='decoder1')
 
             h7 = tf.layers.dense(h6, self.layers[0], activation=lrelu, name='decoder2')

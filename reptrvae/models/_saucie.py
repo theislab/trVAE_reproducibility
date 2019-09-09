@@ -42,7 +42,7 @@ class SAUCIE(Network):
 
         data_loader = Loader(data=adata.X, labels=labels, shuffle=False)
 
-        latent = self.model_backend.get_layer(data_loader, 'decoder0')
+        latent = self.model_backend.get_layer(data_loader, 'mmd')
         latent_adata = anndata.AnnData(X=latent)
         latent_adata.obs = adata.obs.copy(deep=True)
 
