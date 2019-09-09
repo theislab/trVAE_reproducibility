@@ -54,7 +54,7 @@ class scVI(Network):
         ctrl_adata = cell_type_adata[cell_type_adata.obs[condition_key] == source_condition]
 
         le = LabelEncoder()
-        real_adata.obs['batch_indices'] = le.transform(real_adata.obs[condition_key].values)
+        real_adata.obs['batch_indices'] = le.fit_transform(real_adata.obs[condition_key].values)
         ctrl_adata.obs['batch_indices'] = le.transform([target_condition] * ctrl_adata.shape[0])
 
         ctrl_adata = AnnDatasetFromAnnData(ctrl_adata)
