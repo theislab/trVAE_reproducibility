@@ -252,10 +252,10 @@ class CVAE(Network):
                                                        self.size: adata.shape[0], self.is_training: False})
 
         reconstructed = self.sess.run(self.x_hat, feed_dict={self.z_mean: latent, self.y: labels.reshape(-1, 1),
-                                                        self.is_training: False})
+                                                             self.is_training: False})
 
         reconstructed_adata = anndata.AnnData(X=reconstructed)
-        reconstructed_adata.obs = adata.obs(deep=True)
+        reconstructed_adata.obs = adata.obs.copy(deep=True)
         reconstructed_adata.var_names = adata.var_names
         return reconstructed_adata
 
