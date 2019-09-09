@@ -236,8 +236,8 @@ class MMDCVAE(Network):
                     returns array containing latent space encoding of 'data'
         """
         adata = remove_sparsity(adata)
-
-        mmd_latent = self.aux_models['mmd'].predict([adata.X, encoder_labels])
+        latent = self.encoder_model.predict([adata.X, encoder_labels])
+        mmd_latent = self.aux_models['mmd'].predict([latent, encoder_labels])
         mmd_adata = anndata.AnnData(X=mmd_latent)
         mmd_adata.obs = adata.obs(deep=True)
 
