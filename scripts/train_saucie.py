@@ -2,8 +2,9 @@ import sys
 
 import numpy as np
 import scanpy as sc
-from loader import Loader
-from model import SAUCIE
+
+import reptrvae
+from reptrvae.models._saucie import SAUCIE
 
 
 def label_encoder(adata, label_encoder=None, condition_key='condition'):
@@ -62,23 +63,19 @@ cell_type_adata = adata[adata.obs[cell_type_key] == specific_celltype]
 net_train_adata = train_adata[
     ~((train_adata.obs[cell_type_key] == specific_celltype) & (train_adata.obs[condition_key].isin(target_conditions)))]
 
-real_adata = cell_type_adata[cell_type_adata.obs[condition_key] == target_condition]
-ctrl_adata = cell_type_adata[cell_type_adata.obs[condition_key] == source_condition]
+model = SAUCIE(x_dimension=net_train_adata.shape[1], lambda_b=1.0, lambda_c=1.0, layer_c=0, lambda_d=1.0,
+               layers=[800, 800, 128, 40])
 
-x_train = net_train_adata.X
-y_train = label_encoder(net_train_adata, labelencoder, condition_key)
-x_test = ctrl_adata.X
-y_test = np.zeros(ctrl_adata.shape[0]) + labelencoder[target_condition]
+model.train(net_train_adata, condition_key=condition_key, le=labelencoder, n_epochs=1000, batch_size=256)
 
-train_loader = Loader(x_train, labels=y_train, shuffle=True)
-real_loader = Loader(x_test, labels=y_test, shuffle=False)
+mmd_adata = model.to_mmd_layer(net_train_adata, condition_key)
 
-saucie = SAUCIE(x_train.shape[1], lambda_c=.2, lambda_d=.4)
+pred_adata = model.predict(net_train_adata, labelencoder[target_condition], condition_key, cell_type_key,
+                           specific_celltype,
+                           source_condition, target_condition)
 
-saucie.train(train_loader, 1000)
+pred_adata.write_h5ad(f"./data/reconstructed/{data_name}/SAUCIE-{specific_celltype}.h5ad")
 
-pred = saucie.get_reconstruction(real_loader)
-
-pred_adata = sc.AnnData(X=pred[0])
-pred_adata.obs[condition_key] = f"{specific_celltype}_pred_{target_condition}"
-pred_adata.write_h5ad(f"../trVAE_reproducibility/data/reconstructed/{data_name}/SAUCIE-{specific_celltype}.h5ad")
+reptrvae.pl.plot_umap(mmd_adata,
+                      condition_key, cell_type_key,
+                      frameon=False, path_to_save=f"./results/{data_name}/", model_name="SAUCIE")
