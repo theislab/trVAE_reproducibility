@@ -1,16 +1,16 @@
 import logging
 import os
 
+import anndata
 import keras
 import numpy
-import tensorflow as tf
 from keras import backend as K, Model
-from keras.callbacks import CSVLogger, LambdaCallback, EarlyStopping
+from keras.callbacks import CSVLogger, EarlyStopping
 from keras.layers import Input, Dense, BatchNormalization, LeakyReLU, Dropout, Lambda
 from keras.models import load_model
 from scipy import sparse
 
-from reptrvae.utils import balancer, extractor, shuffle_data
+from reptrvae.utils import balancer, extractor, shuffle_data, remove_sparsity
 
 log = logging.getLogger(__file__)
 
@@ -47,13 +47,18 @@ class scGen:
     def __init__(self, x_dimension, z_dimension=100, **kwargs):
         self.x_dim = x_dimension
         self.z_dim = z_dimension
+
         self.learning_rate = kwargs.get("learning_rate", 0.001)
         self.dropout_rate = kwargs.get("dropout_rate", 0.2)
         self.model_to_use = kwargs.get("model_path", "./models/")
         self.alpha = kwargs.get("alpha", 0.00005)
+
         self.x = Input(shape=(x_dimension,), name="input")
         self.z = Input(shape=(z_dimension,), name="latent")
+
         self.init_w = keras.initializers.glorot_normal()
+        self.aux_models = {}
+
         self._create_network()
         self._loss_function()
         self.vae_model.summary()
@@ -83,14 +88,6 @@ class scGen:
         h = BatchNormalization(axis=1)(h)
         h = LeakyReLU()(h)
         h = Dropout(self.dropout_rate)(h)
-        # h = Dense(512, kernel_initializer=self.init_w, use_bias=False)(h)
-        # h = BatchNormalization()(h)
-        # h = LeakyReLU()(h)
-        # h = Dropout(self.dropout_rate)(h)
-        # h = Dense(256, kernel_initializer=self.init_w, use_bias=False)(h)
-        # h = BatchNormalization()(h)
-        # h = LeakyReLU()(h)
-        # h = Dropout(self.dropout_rate)(h)
 
         mean = Dense(self.z_dim, kernel_initializer=self.init_w)(h)
         log_var = Dense(self.z_dim, kernel_initializer=self.init_w)(h)
@@ -117,23 +114,16 @@ class scGen:
         """
         h = Dense(800, kernel_initializer=self.init_w, use_bias=False)(self.z)
         h = BatchNormalization(axis=1)(h)
-        h = LeakyReLU()(h)
+        h_mmd = LeakyReLU()(h_mmd)
         h = Dropout(self.dropout_rate)(h)
         h = Dense(800, kernel_initializer=self.init_w, use_bias=False)(h)
         h = BatchNormalization(axis=1)(h)
         h = LeakyReLU()(h)
         h = Dropout(self.dropout_rate)(h)
-        # h = Dense(768, kernel_initializer=self.init_w, use_bias=False)(h)
-        # h = BatchNormalization()(h)
-        # h = LeakyReLU()(h)
-        # h = Dropout(self.dropout_rate)(h)
-        # h = Dense(1024, kernel_initializer=self.init_w, use_bias=False)(h)
-        # h = BatchNormalization()(h)
-        # h = LeakyReLU()(h)
-        # h = Dropout(self.dropout_rate)(h)
         h = Dense(self.x_dim, kernel_initializer=self.init_w, use_bias=True)(h)
 
         self.decoder_model = Model(inputs=self.z, outputs=h, name="decoder")
+        self.decoder_mmd_model = Model(self.z, h_mmd, name="decoder_mmd")
         return h
 
     @staticmethod
@@ -177,6 +167,7 @@ class scGen:
 
         self.x_hat = self._decoder()
         self.vae_model = Model(inputs=self.x, outputs=self.decoder_model(self.encoder_model(self.x)), name="VAE")
+        self.aux_models['mmd'] = Model(self.x, self.decoder_mmd_model(self.encoder_model(self.x)), name="MMD")
 
     def _loss_function(self):
         """
@@ -206,24 +197,23 @@ class scGen:
         self.vae_optimizer = keras.optimizers.Adam(lr=self.learning_rate)
         self.vae_model.compile(optimizer=self.vae_optimizer, loss=vae_loss, metrics=[kl_loss, recon_loss])
 
-    def to_latent(self, data):
-        """
-            Map `data` in to the latent space. This function will feed data
-            in encoder part of VAE and compute the latent space coordinates
-            for each sample in data.
+    def to_latent(self, adata):
+        adata = remove_sparsity(adata)
 
-            Parameters
-            ----------
-            data:  numpy nd-array
-                Numpy nd-array to be mapped to latent space. `data.X` has to be in shape [n_obs, n_vars].
+        latent = self.encoder_model.predict(adata.X)
+        latent_adata = anndata.AnnData(X=latent)
+        latent_adata.obs = adata.obs.copy(deep=True)
 
-            Returns
-            -------
-            latent: numpy nd-array
-                Returns array containing latent space encoding of 'data'
-        """
-        latent = self.encoder_model.predict(data)
-        return latent
+        return latent_adata
+
+    def to_mmd_layer(self, adata):
+        adata = remove_sparsity(adata)
+
+        mmd_latent = self.aux_models['mmd'].predict(adata.X)
+        mmd_adata = anndata.AnnData(X=mmd_latent)
+        mmd_adata.obs = adata.obs.copy(deep=True)
+
+        return mmd_adata
 
     def _avg_vector(self, data):
         """
@@ -266,7 +256,8 @@ class scGen:
         rec_data = self.decoder_model.predict(x=data)
         return rec_data
 
-    def predict(self, adata, conditions, cell_type_key, condition_key, adata_to_predict=None, celltype_to_predict=None, obs_key="all"):
+    def predict(self, adata, conditions, cell_type_key, condition_key, adata_to_predict=None, celltype_to_predict=None,
+                obs_key="all"):
         if obs_key == "all":
             ctrl_x = adata[adata.obs["condition"] == conditions["ctrl"], :]
             stim_x = adata[adata.obs["condition"] == conditions["stim"], :]
@@ -329,23 +320,10 @@ class scGen:
         if shuffle:
             train_data = shuffle_data(train_data)
 
-        if sparse.issparse(train_data.X):
-            train_data.X = train_data.X.A
-
-
-        # def on_epoch_end(epoch, logs):
-        #     if epoch % checkpoint == 0:
-        #         path_to_save = os.path.join(kwargs.get("path_to_save"), f"epoch_{epoch}") + "/"
-        #         scgen.visualize_trained_network_results(self, vis_data, kwargs.get("cell_type"),
-        #                                                 kwargs.get("conditions"),
-        #                                                 kwargs.get("condition_key"), kwargs.get("cell_type_key"),
-        #                                                 path_to_save,
-        #                                                 plot_umap=False,
-        #                                                 plot_reg=True)
+        train_data = remove_sparsity(train_data)
 
         callbacks = [
-            # LambdaCallback(on_epoch_end=on_epoch_end),
-            # EarlyStopping(patience=early_stop_limit, monitor='loss', min_delta=threshold),
+            EarlyStopping(patience=early_stop_limit, monitor='val_loss', min_delta=threshold),
             CSVLogger(filename="./csv_logger.log")
         ]
         if validation_data is not None:
@@ -360,6 +338,7 @@ class scGen:
         else:
             result = self.vae_model.fit(x=train_data.X,
                                         y=train_data.X,
+                                        validation_split=0.2,
                                         epochs=n_epochs,
                                         batch_size=batch_size,
                                         shuffle=shuffle,
