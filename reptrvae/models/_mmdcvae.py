@@ -243,7 +243,7 @@ class MMDCVAE(Network):
 
         mmd_latent = self.aux_models['mmd'].predict([latent, encoder_labels])
         mmd_adata = anndata.AnnData(X=mmd_latent)
-        mmd_adata.obs = adata.obs(deep=True)
+        mmd_adata.obs = adata.obs.copy(deep=True)
 
         return mmd_adata
 
