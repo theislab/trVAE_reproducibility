@@ -38,7 +38,7 @@ elif data_name == "kang":
 else:
     raise Exception("Invalid Data name")
 
-adata = sc.read(f"../data/{data_name}/{data_name}_normalized.h5ad")
+adata = sc.read(f"./data/{data_name}/{data_name}_normalized.h5ad")
 
 if adata.shape[0] > 2000:
     sc.pp.highly_variable_genes(adata, n_top_genes=2000)

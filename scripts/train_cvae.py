@@ -63,7 +63,7 @@ elif data_name == "kang":
     target_conditions = ['STIM']
     le = {"CTRL": 0, "STIM": 1}
 
-adata = sc.read(f"../data/{data_name}/{data_name}_normalized.h5ad")
+adata = sc.read(f"./data/{data_name}/{data_name}_normalized.h5ad")
 adata = adata.copy()[adata.obs[condition_key].isin(keys)]
 
 if adata.shape[1] > 2000:

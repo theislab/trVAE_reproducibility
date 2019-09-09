@@ -40,7 +40,7 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
         stim_keys = ["STIM"]
         cell_type_key = "cell_type"
 
-    adata = sc.read(f"../data/{data_name}/{data_name}_normalized.h5ad")
+    adata = sc.read(f"./data/{data_name}/{data_name}_normalized.h5ad")
     adata = adata.copy()[adata.obs[condition_key].isin(keys)]
 
     if adata.shape[1] > 2000:
@@ -86,7 +86,7 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
         ctrl_key = "CTRL"
         cell_type_key = "cell_type"
 
-    adata = sc.read(f"../data/{data_name}/{data_name}_normalized.h5ad")
+    adata = sc.read(f"./data/{data_name}/{data_name}_normalized.h5ad")
     adata = adata.copy()[adata.obs[condition_key].isin(keys)]
 
     if adata.shape[1] > 2000:
