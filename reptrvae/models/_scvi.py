@@ -20,7 +20,7 @@ class scVI(Network):
 
         self.model_path = kwargs.get("model_path", "./")
 
-        self.__compile_network()
+        self.__create_network()
 
     def __create_network(self):
         self.model = VAE(self.x_dimension,
