@@ -74,7 +74,7 @@ class MMDCVAE(Network):
         self.aux_models = {}
 
         self.__create_network()
-        self._calculate_loss()
+        self.__compile_network()
 
         self.encoder_model.summary()
         self.decoder_model.summary()
