@@ -83,7 +83,7 @@ print("Model has been trained")
 sc.settings.figdir = f"../results/{data_name}/"
 
 encoder_labels, _ = label_encoder(net_train_adata, condition_key=condition_key)
-decoder_labels = np.ones_like(encoder_labels)
+decoder_labels = encoder_labels
 
 latent_adata = network.to_latent(net_train_adata, encoder_labels)
 mmd_latent_adata = network.to_mmd_layer(net_train_adata, encoder_labels, decoder_labels)
