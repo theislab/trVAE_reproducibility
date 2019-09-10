@@ -238,6 +238,7 @@ class MMDCVAE(Network):
         adata = remove_sparsity(adata)
 
         encoder_labels = to_categorical(encoder_labels, num_classes=self.n_conditions)
+        decoder_labels = to_categorical(decoder_labels, num_classes=self.n_conditions)
 
         latent = self.encoder_model.predict([adata.X, encoder_labels])[2]
 
