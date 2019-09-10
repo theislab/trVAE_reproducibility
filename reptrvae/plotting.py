@@ -237,7 +237,8 @@ def reg_var_plot(adata, condition_key, axis_keys, labels, path_to_save="./reg_va
     pyplot.close()
 
 
-def plot_umap(adata, condition_key=None, cell_type_key=None, frameon=False, path_to_save=None, model_name=""):
+def plot_umap(adata, condition_key=None, cell_type_key=None, frameon=False, path_to_save=None, model_name="",
+              ext='pdf', title=""):
     if cell_type_key is None and condition_key is None:
         raise Exception('at least one of cell_type_key or condition_key has to be set')
 
@@ -247,8 +248,8 @@ def plot_umap(adata, condition_key=None, cell_type_key=None, frameon=False, path
     sc.tl.umap(adata)
 
     if condition_key:
-        sc.pl.umap(adata, color=condition_key, frameon=frameon, save=f"_{model_name}_condition.pdf")
+        sc.pl.umap(adata, color=condition_key, frameon=frameon, save=f"_{model_name}_condition.{ext}", title=title)
     if cell_type_key:
-        sc.pl.umap(adata, color=cell_type_key, frameon=frameon, save=f"_{model_name}_cell_type.pdf")
+        sc.pl.umap(adata, color=cell_type_key, frameon=frameon, save=f"_{model_name}_cell_type.{ext}", title=title)
 
     sc.settings.figdir = last_figdir

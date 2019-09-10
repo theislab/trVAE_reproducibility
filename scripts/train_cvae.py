@@ -76,7 +76,7 @@ source_labels = np.zeros((len(unperturbed_data), 1)) + le[control_condition]
 pred_adata = network.predict(unperturbed_data, source_labels, target_labels)
 pred_adata.obs[condition_key] = [f"{specific_cell_type}_pred_{target_condition}"] * len(target_labels)
 pred_adata.obs['method'] = 'CVAE'
-pred_adata.write(f"../data/reconstructed/{data_name}/CVAE-{specific_cell_type}.h5ad")
+pred_adata.write(f"./data/reconstructed/{data_name}/CVAE-{specific_cell_type}.h5ad")
 
 print("Model has been trained")
 
@@ -90,5 +90,5 @@ mmd_latent_adata = network.to_mmd_layer(adata, encoder_labels, decoder_labels)
 
 print("Latents has been computed")
 plot_umap(mmd_latent_adata, condition_key, cell_type_key, False,
-          path_to_save=f"./results/{data_name}/", model_name="CVAE_MMD")
+          path_to_save=f"./results/{data_name}/", model_name="CVAE_MMD", ext="jpeg")
 print("Latents has been plotted and saved")
