@@ -76,12 +76,16 @@ pred_adata = network.predict(unperturbed_data, target_labels)
 pred_adata.obs[condition_key] = [f"{specific_cell_type}_pred_{target_condition}"] * len(target_labels)
 pred_adata.obs['method'] = 'CVAE'
 pred_adata.write(f"../data/reconstructed/{data_name}/CVAE-{specific_cell_type}.h5ad")
+
 print("Model has been trained")
+
 sc.settings.figdir = f"../results/{data_name}/"
-labels, _ = label_encoder(adata, condition_key=condition_key)
-labels = np.ones_like(labels)
-latent_adata = network.to_latent(adata, labels)
-mmd_latent_adata = network.to_mmd_layer(adata, labels)
+
+encoder_labels, _ = label_encoder(adata, condition_key=condition_key)
+decoder_labels = np.ones_like(encoder_labels)
+
+latent_adata = network.to_latent(adata, encoder_labels)
+mmd_latent_adata = network.to_mmd_layer(adata, encoder_labels, decoder_labels)
 
 print("Latents has been computed")
 plot_umap(mmd_latent_adata, condition_key, cell_type_key, False,

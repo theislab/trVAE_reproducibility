@@ -48,7 +48,8 @@ class CVAE(Network):
         self.global_step = tensorflow.Variable(0, name='global_step', trainable=False, dtype=tensorflow.int32)
         self.x = tensorflow.placeholder(tensorflow.float32, shape=[None, self.x_dim], name="data")
         self.z = tensorflow.placeholder(tensorflow.float32, shape=[None, self.z_dim], name="latent")
-        self.y = tensorflow.placeholder(tensorflow.float32, shape=[None, 1], name="labels")
+        self.encoder_labels = tensorflow.placeholder(tensorflow.float32, shape=[None, 1], name="encoder_labels")
+        self.decoder_labels = tensorflow.placeholder(tensorflow.float32, shape=[None, 1], name="decoder_labels")
         self.time_step = tensorflow.placeholder(tensorflow.int32)
         self.size = tensorflow.placeholder(tensorflow.int32)
         self.init_w = tensorflow.contrib.layers.xavier_initializer()
@@ -73,7 +74,7 @@ class CVAE(Network):
                     A dense layer consists of log transformed variances of gaussian distributions of latent space dimensions.
         """
         with tensorflow.variable_scope("encoder", reuse=tensorflow.AUTO_REUSE):
-            xy = tensorflow.concat([self.x, self.y], axis=1)
+            xy = tensorflow.concat([self.x, self.encoder_labels], axis=1)
             h = tensorflow.layers.dense(inputs=xy, units=700, kernel_initializer=self.init_w, use_bias=False)
             h = tensorflow.layers.batch_normalization(h, axis=1, training=self.is_training)
             h = tensorflow.nn.leaky_relu(h)
@@ -97,7 +98,7 @@ class CVAE(Network):
                     A Tensor for last dense layer with the shape of [n_vars, ] to reconstruct data.
         """
         with tensorflow.variable_scope("decoder", reuse=tensorflow.AUTO_REUSE):
-            xy = tensorflow.concat([self.z_mean, self.y], axis=1)
+            xy = tensorflow.concat([self.z_mean, self.decoder_labels], axis=1)
             h = tensorflow.layers.dense(inputs=xy, units=400, kernel_initializer=self.init_w, use_bias=False)
             h = tensorflow.layers.batch_normalization(h, axis=1, training=self.is_training)
             h_mmd = tensorflow.nn.leaky_relu(h)
@@ -196,14 +197,14 @@ class CVAE(Network):
         """
         adata = remove_sparsity(adata)
 
-        latent = self.sess.run(self.z_mean, feed_dict={self.x: adata.X, self.y: labels,
+        latent = self.sess.run(self.z_mean, feed_dict={self.x: adata.X, self.encoder_labels: labels,
                                                        self.size: adata.shape[0], self.is_training: False})
         latent_adata = anndata.AnnData(X=latent)
         latent_adata.obs = adata.obs.copy(deep=True)
 
         return latent_adata
 
-    def to_mmd_layer(self, adata, labels):
+    def to_mmd_layer(self, adata, encoder_labels, decoder_labels):
         """
             Map `data` in to the pn layer after latent layer. This function will feed data
             in encoder part of C-VAE and compute the latent space coordinates
@@ -218,14 +219,15 @@ class CVAE(Network):
                     returns array containing latent space encoding of 'data'
         """
         adata = remove_sparsity(adata)
-        mmd_latent = self.sess.run(self.mmd_hl, feed_dict={self.x: adata.X, self.y: labels,
+        mmd_latent = self.sess.run(self.mmd_hl, feed_dict={self.x: adata.X, self.encoder_labels: encoder_labels,
+                                                           self.decoder_labels: decoder_labels,
                                                            self.size: adata.shape[0], self.is_training: False})
         mmd_adata = anndata.AnnData(X=mmd_latent)
         mmd_adata.obs = adata.obs.copy(deep=True)
 
         return mmd_adata
 
-    def predict(self, adata, labels):
+    def predict(self, adata, encoder_labels, decoder_labels):
         """
             Predicts the cell type provided by the user in stimulated condition.
             # Parameters
@@ -248,10 +250,10 @@ class CVAE(Network):
             ```
         """
         adata = remove_sparsity(adata)
-        latent = self.sess.run(self.z_mean, feed_dict={self.x: adata.X, self.y: labels,
+        latent = self.sess.run(self.z_mean, feed_dict={self.x: adata.X, self.encoder_labels: encoder_labels,
                                                        self.size: adata.shape[0], self.is_training: False})
 
-        reconstructed = self.sess.run(self.x_hat, feed_dict={self.z_mean: latent, self.y: labels.reshape(-1, 1),
+        reconstructed = self.sess.run(self.x_hat, feed_dict={self.z_mean: latent, self.decoder_labels: decoder_labels,
                                                              self.is_training: False})
 
         reconstructed_adata = anndata.AnnData(X=reconstructed)
@@ -341,7 +343,8 @@ class CVAE(Network):
                     x_mb = train_data[lower:upper, :].X
                 y_mb = train_labels[lower:upper]
                 _, current_loss_train = self.sess.run([self.solver, self.vae_loss],
-                                                      feed_dict={self.x: x_mb, self.y: y_mb,
+                                                      feed_dict={self.x: x_mb, self.encoder_labels: y_mb,
+                                                                 self.decoder_labels: y_mb,
                                                                  self.time_step: current_step,
                                                                  self.size: len(x_mb), self.is_training: True})
                 train_loss += current_loss_train
@@ -355,10 +358,12 @@ class CVAE(Network):
                     else:
                         x_mb = valid_data[lower:upper, :].X
                     y_mb = valid_labels[lower:upper]
-                    current_loss_valid = self.sess.run(self.vae_loss, feed_dict={self.x: x_mb, self.y: y_mb,
-                                                                                 self.time_step: current_step,
-                                                                                 self.size: len(x_mb),
-                                                                                 self.is_training: False})
+                    current_loss_valid = self.sess.run(self.vae_loss,
+                                                       feed_dict={self.x: x_mb, self.encoder_labels: y_mb,
+                                                                  self.decoder_labels: y_mb,
+                                                                  self.time_step: current_step,
+                                                                  self.size: len(x_mb),
+                                                                  self.is_training: False})
                     valid_loss += current_loss_valid
                 loss_hist.append(valid_loss / valid_data.shape[0])
                 if it > 0 and loss_hist[it - 1] - loss_hist[it] > min_delta:
