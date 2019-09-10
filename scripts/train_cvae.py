@@ -72,7 +72,8 @@ cell_type_adata = train_adata[train_adata.obs[cell_type_key] == specific_cell_ty
 
 unperturbed_data = cell_type_adata[cell_type_adata.obs[condition_key] == control_condition]
 target_labels = np.zeros((len(unperturbed_data), 1)) + le[target_condition]
-pred_adata = network.predict(unperturbed_data, target_labels)
+source_labels = np.zeros((len(unperturbed_data), 1)) + le[control_condition]
+pred_adata = network.predict(unperturbed_data, source_labels, target_labels)
 pred_adata.obs[condition_key] = [f"{specific_cell_type}_pred_{target_condition}"] * len(target_labels)
 pred_adata.obs['method'] = 'CVAE'
 pred_adata.write(f"../data/reconstructed/{data_name}/CVAE-{specific_cell_type}.h5ad")
