@@ -65,7 +65,7 @@ network = CVAE(x_dimension=net_train_adata.X.shape[1],
 network.train(net_train_adata,
               use_validation=True,
               valid_data=net_valid_adata,
-              n_epochs=300)
+              n_epochs=100)
 
 train_labels, _ = label_encoder(train_adata, le, 'condition')
 cell_type_adata = train_adata[train_adata.obs[cell_type_key] == specific_cell_type]
