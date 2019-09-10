@@ -19,9 +19,9 @@ elif data_name == "kang":
     cell_type_key = 'cell_type'
     condition_key = 'condition'
     specific_celltype = "NK"
-    source_conditions = ["CTRL"]
-    target_conditions = ["STIM"]
-    conditions = ['CTRL', 'STIM']
+    source_conditions = ["control"]
+    target_conditions = ["stimulated"]
+    conditions = ['control', 'stimulated']
 else:
     raise Exception("Invalid data_name")
 

@@ -25,8 +25,8 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
         stim_keys = ["LPS6"]
         cell_type_key = "species"
     elif data_name == "kang":
-        keys = ['CTRL', 'STIM']
-        stim_keys = ["STIM"]
+        keys = ['control', 'stimulated']
+        stim_keys = ["stimulated"]
         cell_type_key = "cell_type"
 
     adata = sc.read(f"./data/{data_name}/{data_name}_normalized.h5ad")
@@ -74,9 +74,9 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
         ctrl_key = "unst"
         cell_type_key = "species"
     elif data_name == "kang":
-        keys = ['CTRL', 'STIM']
-        stim_key = "STIM"
-        ctrl_key = "CTRL"
+        keys = ['control', 'stimulated']
+        stim_key = "stimulated"
+        ctrl_key = "control"
         cell_type_key = "cell_type"
 
     adata = sc.read(f"./data/{data_name}/{data_name}_normalized.h5ad")

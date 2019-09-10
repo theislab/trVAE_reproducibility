@@ -27,14 +27,14 @@ elif data_name == "species":
     target_conditions = ['LPS6']
     le = {"unst": 0, "LPS6": 1}
 elif data_name == "kang":
-    keys = ["CTRL", "STIM"]
+    keys = ["control", "stimulated"]
     specific_cell_type = "NK"
     cell_type_key = "cell_type"
     condition_key = "condition"
-    source_condition = "CTRL"
-    target_condition = "STIM"
-    target_conditions = ['STIM']
-    le = {"CTRL": 0, "STIM": 1}
+    control_condition = "control"
+    target_condition = "stimulated"
+    target_conditions = ['stimulated']
+    le = {"control": 0, "stimulated": 1}
 else:
     raise Exception("Invalid Data name")
 

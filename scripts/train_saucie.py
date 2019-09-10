@@ -40,11 +40,11 @@ if data_name == "haber":
     specific_celltype = "Tuft"
 
 elif data_name == "kang":
-    conditions = ["CTRL", "STIM"]
-    target_conditions = ["STIM"]
-    source_condition = "CTRL"
-    target_condition = "STIM"
-    labelencoder = {"CTRL": 0, "STIM": 1}
+    conditions = ["control", "stimulated"]
+    target_conditions = ["stimulated"]
+    source_condition = "control"
+    target_condition = "stimulated"
+    labelencoder = {"control": 0, "stimulated": 1}
     cell_type_key = "cell_type"
     condition_key = "condition"
     specific_celltype = "NK"

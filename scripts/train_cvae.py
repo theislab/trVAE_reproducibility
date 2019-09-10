@@ -29,14 +29,14 @@ elif data_name == "species":
     target_conditions = ['LPS6']
     le = {"unst": 0, "LPS6": 1}
 elif data_name == "kang":
-    keys = ["CTRL", "STIM"]
+    keys = ["control", "stimulated"]
     specific_cell_type = "NK"
     cell_type_key = "cell_type"
     condition_key = "condition"
-    control_condition = "CTRL"
-    target_condition = "STIM"
-    target_conditions = ['STIM']
-    le = {"CTRL": 0, "STIM": 1}
+    control_condition = "control"
+    target_condition = "stimulated"
+    target_conditions = ['stimulated']
+    le = {"control": 0, "stimulated": 1}
 else:
     raise Exception("Invalid data name")
 
@@ -56,7 +56,7 @@ net_valid_adata = valid_adata[
     ~((valid_adata.obs[cell_type_key] == specific_cell_type) & (
         valid_adata.obs[condition_key].isin(target_conditions)))]
 
-z_dim = 40
+z_dim = 100
 network = CVAE(x_dimension=net_train_adata.X.shape[1],
                z_dimension=z_dim,
                alpha=0.1,
