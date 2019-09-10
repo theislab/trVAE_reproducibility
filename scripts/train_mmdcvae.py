@@ -69,9 +69,9 @@ network.train(net_train_adata,
               shuffle=True,
               )
 
-train_labels, _ = reptrvae.tl.label_encoder(net_train_adata, labelencoder, condition_key)
-train_labels = np.ones_like(train_labels)
-mmd_adata = network.to_mmd_layer(net_train_adata, train_labels)
+encoder_labels, _ = reptrvae.tl.label_encoder(net_train_adata, labelencoder, condition_key)
+decoder_labels = np.ones_like(encoder_labels)
+mmd_adata = network.to_mmd_layer(net_train_adata, encoder_labels, decoder_labels)
 
 cell_type_adata = adata[adata.obs[cell_type_key] == specific_celltype]
 source_adata = cell_type_adata[cell_type_adata.obs[condition_key] == source_condition]

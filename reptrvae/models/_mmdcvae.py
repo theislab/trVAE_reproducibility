@@ -221,7 +221,7 @@ class MMDCVAE(Network):
 
         return latent_adata
 
-    def to_mmd_layer(self, adata, encoder_labels):
+    def to_mmd_layer(self, adata, encoder_labels, decoder_labels):
         """
             Map `data` in to the pn layer after latent layer. This function will feed data
             in encoder part of C-VAE and compute the latent space coordinates
@@ -241,7 +241,7 @@ class MMDCVAE(Network):
 
         latent = self.encoder_model.predict([adata.X, encoder_labels])[2]
 
-        mmd_latent = self.aux_models['mmd'].predict([latent, encoder_labels])
+        mmd_latent = self.aux_models['mmd'].predict([latent, decoder_labels])
         mmd_adata = anndata.AnnData(X=mmd_latent)
         mmd_adata.obs = adata.obs.copy(deep=True)
 
