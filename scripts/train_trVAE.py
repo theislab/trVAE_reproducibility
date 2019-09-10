@@ -88,4 +88,5 @@ pred_adata.write_h5ad(f"./data/reconstructed/{data_name}/trVAE-{specific_celltyp
 
 reptrvae.pl.plot_umap(mmd_adata,
                       condition_key, cell_type_key,
-                      frameon=False, path_to_save=f"./results/{data_name}/", model_name="trVAE_MMD")
+                      frameon=False, path_to_save=f"./results/{data_name}/", model_name="trVAE_MMD",
+                      ext="png")
