@@ -57,9 +57,9 @@ class SAUCIE(Network):
         real_loader = Loader(source_adata.X, labels=y_test, shuffle=False)
 
         pred = self.model_backend.get_reconstruction(real_loader)
-        pred = np.nan_to_num(pred)
+        pred = np.nan_to_num(pred[0])
 
-        pred_adata = anndata.AnnData(X=pred[0])
+        pred_adata = anndata.AnnData(X=pred)
         pred_adata.obs[condition_key] = f"{cell_type_to_predict}_pred_{target_condition}"
         pred_adata.var_names = adata.var_names
 
