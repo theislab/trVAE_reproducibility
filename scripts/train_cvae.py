@@ -90,5 +90,5 @@ mmd_latent_adata = network.to_mmd_layer(net_train_adata, encoder_labels, decoder
 
 print("Latents has been computed")
 plot_umap(mmd_latent_adata, condition_key, cell_type_key, False,
-          path_to_save=f"./results/{data_name}/", model_name="CVAE_MMD", ext="jpg")
+          path_to_save=f"./results/{data_name}/", model_name="CVAE_MMD", ext="png")
 print("Latents has been plotted and saved")
