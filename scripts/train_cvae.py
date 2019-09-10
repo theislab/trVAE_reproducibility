@@ -82,11 +82,11 @@ print("Model has been trained")
 
 sc.settings.figdir = f"../results/{data_name}/"
 
-encoder_labels, _ = label_encoder(adata, condition_key=condition_key)
+encoder_labels, _ = label_encoder(net_train_adata, condition_key=condition_key)
 decoder_labels = np.ones_like(encoder_labels)
 
-latent_adata = network.to_latent(adata, encoder_labels)
-mmd_latent_adata = network.to_mmd_layer(adata, encoder_labels, decoder_labels)
+latent_adata = network.to_latent(net_train_adata, encoder_labels)
+mmd_latent_adata = network.to_mmd_layer(net_train_adata, encoder_labels, decoder_labels)
 
 print("Latents has been computed")
 plot_umap(mmd_latent_adata, condition_key, cell_type_key, False,
