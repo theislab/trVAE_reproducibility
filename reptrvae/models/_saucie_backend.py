@@ -25,7 +25,7 @@ class SAUCIE_BACKEND(object):
         lambda_c=0,
         layer_c=0,
         lambda_d=0,
-        layers=[512,256,128,2],
+        layers=[512,256,128,20],
         activation=lrelu,
         learning_rate=.001,
         restore_folder='',
