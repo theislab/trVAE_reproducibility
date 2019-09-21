@@ -28,6 +28,7 @@ if data_name == "celeba":
                                                 img_height=64,
                                                 restore=True,
                                                 save=True)
+    input_shape = (64, 64, 3)
 elif data_name == "mnist":
     conditions = ["normal", "thin", "thick"]
     target_conditions = ["thin", 'thick']
@@ -38,6 +39,7 @@ elif data_name == "mnist":
     specific_labels = [1, 3, 6, 7]
     arch_style = 1
     adata = sc.read("./data/thick_thin_mnist/thick_thin_mnist.h5ad")
+    input_shape = (28, 28, 1)
 else:
     raise Exception("Invalid data name")
 
@@ -50,7 +52,7 @@ net_train_adata = train_adata[
 net_valid_adata = valid_adata[
     ~((valid_adata.obs[label_key].isin(specific_labels)) & (valid_adata.obs[condition_key].isin(target_conditions)))]
 
-network = reptrvae.models.DCtrVAE(x_dimension=net_train_adata.shape[1],
+network = reptrvae.models.DCtrVAE(x_dimension=input_shape,
                                   z_dimension=60,
                                   n_conditions=len(net_train_adata.obs[condition_key].unique()),
                                   alpha=5e-5,
