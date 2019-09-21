@@ -3,6 +3,7 @@
 from . import utils as tl
 from . import models
 from . import plotting as pl
+from . import data_loader as dl
 
 __author__ = ', '.join([
     'Mohsen Naghipourfar',
