@@ -12,8 +12,8 @@ from keras.layers.advanced_activations import LeakyReLU
 from keras.models import Model, load_model
 from keras.utils import multi_gpu_model, to_categorical
 
-from trvae.models._utils import sample_z, print_message
-from trvae.utils import label_encoder, remove_sparsity
+from reptrvae.models._utils import sample_z, print_message
+from reptrvae.utils import label_encoder, remove_sparsity
 from ._losses import LOSSES
 
 log = logging.getLogger(__file__)
