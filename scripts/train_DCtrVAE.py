@@ -1,5 +1,5 @@
 import sys
-
+import os
 import numpy as np
 import scanpy as sc
 
@@ -96,8 +96,10 @@ for target_condition in target_conditions:
 
         pred_adata_all = pred_adata.copy() if pred_adata_all is None else pred_adata_all.concatenate(pred_adata)
 
+os.makedirs(f"./data/reconstructed/{data_name}/", exist_ok=True)
 pred_adata_all.write_h5ad(f"./data/reconstructed/{data_name}/trVAE.h5ad")
 
+os.makedirs(f"./results/{data_name}/", exist_ok=True)
 # reptrvae.pl.plot_umap(mmd_adata,
 #                       condition_key, cell_type_key,
 #                       frameon=False, path_to_save=f"./results/{data_name}/", model_name="trVAE_MMD",
