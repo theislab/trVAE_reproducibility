@@ -9,14 +9,14 @@ from reptrvae.utils import remove_sparsity
 data_name = sys.argv[1]
 
 if data_name == "celeba":
-    conditions = ["-1", "1"]
-    target_conditions = ["-1"]
-    source_condition = "-1"
-    target_condition = "1"
-    labelencoder = {"-1": 0, "1": 1}
+    conditions = [-1, 1]
+    target_conditions = [-1]
+    source_condition = -1
+    target_condition = 1
+    labelencoder = {-1: 0, 1: 1}
     label_key = "labels"
     condition_key = "condition"
-    specific_labels = ["1"]
+    specific_labels = [1]
     arch_style = 3
     adata = reptrvae.dl.prepare_and_load_celeba(file_path="./data/celeba/img_align_celeba.zip",
                                                 attr_path="./data/celeba/list_attr_celeba.txt",
