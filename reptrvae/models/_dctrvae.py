@@ -240,11 +240,11 @@ class DCtrVAE:
             h = Dense(1024, kernel_initializer='he_normal')(h_mmd)
             h = Activation('relu')(h)
 
-            h = Dense(512 * 2 * 2, kernel_initializer='he_normal')(h)
+            h = Dense(512 * 4 * 4, kernel_initializer='he_normal')(h)
             h = Activation('relu')(h)
 
-            width = 2
-            height = 2
+            width = 4
+            height = 4
             n_channels = 512
             h = Reshape(target_shape=(width, height, n_channels))(h)
 
@@ -269,9 +269,8 @@ class DCtrVAE:
 
             conv10 = Conv2DTranspose(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(up9)
             conv10 = Conv2DTranspose(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv10)
-            up10 = UpSampling2D(size=(2, 2))(conv10)
 
-            conv10 = Conv2DTranspose(self.x_dim[-1], 1, activation='relu', padding='same')(up10)
+            conv10 = Conv2DTranspose(self.x_dim[-1], 1, activation='relu', padding='same')(conv10)
 
             decoder_model = Model(inputs=[self.z, self.decoder_labels], outputs=conv10, name=name)
             decoder_mmd_model = Model(inputs=[self.z, self.decoder_labels], outputs=h_mmd, name='deocder_mmd')
