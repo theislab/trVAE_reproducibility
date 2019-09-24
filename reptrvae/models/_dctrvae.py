@@ -240,7 +240,7 @@ class DCtrVAE:
             h = Dense(1024, kernel_initializer='he_normal')(h_mmd)
             h = Activation('relu')(h)
 
-            h = Dense(512 * 4 * 4, kernel_initializer='he_normal')(h)
+            h = Dense(512 * 2 * 2, kernel_initializer='he_normal')(h)
             h = Activation('relu')(h)
 
             width = 2
