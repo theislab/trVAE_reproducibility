@@ -44,6 +44,9 @@ else:
     raise Exception("Invalid data name")
 
 adata = remove_sparsity(adata)
+# Preprocessing
+adata.X /= 255.0
+
 
 train_adata, valid_adata = reptrvae.utils.train_test_split(adata, 0.80)
 
