@@ -65,6 +65,7 @@ network = reptrvae.models.DCtrVAE(x_dimension=input_shape,
                                   lambda_l1=0.0,
                                   lambda_l2=0.0,
                                   learning_rate=0.001,
+                                  arch_style=arch_style,
                                   model_path=f"./models/trVAE/best/{data_name}-{specific_labels}/",
                                   dropout_rate=0.2,
                                   output_activation='relu')
