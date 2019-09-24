@@ -248,30 +248,30 @@ class DCtrVAE:
             n_channels = 512
             h = Reshape(target_shape=(width, height, n_channels))(h)
 
-            conv6 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(h)
-            conv6 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv6)
-            conv6 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv6)
+            conv6 = Conv2DTranspose(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(h)
+            conv6 = Conv2DTranspose(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv6)
+            conv6 = Conv2DTranspose(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv6)
             up6 = UpSampling2D(size=(2, 2))(conv6)
 
-            conv7 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(up6)
-            conv7 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv7)
-            conv7 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv7)
+            conv7 = Conv2DTranspose(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(up6)
+            conv7 = Conv2DTranspose(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv7)
+            conv7 = Conv2DTranspose(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv7)
             up7 = UpSampling2D(size=(2, 2))(conv7)
 
-            conv8 = Conv2D(256, 3, activation='relu', padding='same', kernel_initializer='he_normal')(up7)
-            conv8 = Conv2D(256, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv8)
-            conv8 = Conv2D(256, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv8)
+            conv8 = Conv2DTranspose(256, 3, activation='relu', padding='same', kernel_initializer='he_normal')(up7)
+            conv8 = Conv2DTranspose(256, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv8)
+            conv8 = Conv2DTranspose(256, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv8)
             up8 = UpSampling2D(size=(2, 2))(conv8)
 
-            conv9 = Conv2D(128, 3, activation='relu', padding='same', kernel_initializer='he_normal')(up8)
-            conv9 = Conv2D(128, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv9)
+            conv9 = Conv2DTranspose(128, 3, activation='relu', padding='same', kernel_initializer='he_normal')(up8)
+            conv9 = Conv2DTranspose(128, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv9)
             up9 = UpSampling2D(size=(2, 2))(conv9)
 
-            conv10 = Conv2D(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(up9)
-            conv10 = Conv2D(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv10)
+            conv10 = Conv2DTranspose(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(up9)
+            conv10 = Conv2DTranspose(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv10)
             up10 = UpSampling2D(size=(2, 2))(conv10)
 
-            conv10 = Conv2D(self.x_dim[-1], 1, activation='relu')(up10)
+            conv10 = Conv2DTranspose(self.x_dim[-1], 1, activation='relu', padding='same')(up10)
 
             decoder_model = Model(inputs=[self.z, self.decoder_labels], outputs=conv10, name=name)
             decoder_mmd_model = Model(inputs=[self.z, self.decoder_labels], outputs=h_mmd, name='deocder_mmd')
