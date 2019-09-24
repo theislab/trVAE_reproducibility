@@ -243,8 +243,8 @@ class DCtrVAE:
             h = Dense(512 * 4 * 4, kernel_initializer='he_normal')(h)
             h = Activation('relu')(h)
 
-            width = 4
-            height = 4
+            width = 2
+            height = 2
             n_channels = 512
             h = Reshape(target_shape=(width, height, n_channels))(h)
 
