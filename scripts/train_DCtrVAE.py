@@ -20,7 +20,7 @@ if data_name == "celeba":
     arch_style = 3
     adata = reptrvae.dl.prepare_and_load_celeba(file_path="./data/celeba/img_align_celeba.zip",
                                                 attr_path="./data/celeba/list_attr_celeba.txt",
-                                                landmark_path="../data/celeba/list_landmarks_align_celeba.txt",
+                                                landmark_path="./data/celeba/list_landmarks_align_celeba.txt",
                                                 gender="Male",
                                                 attribute="Smiling",
                                                 max_n_images=50000,
