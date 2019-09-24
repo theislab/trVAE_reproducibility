@@ -205,6 +205,7 @@ class DCtrVAE:
             h = Conv2DTranspose(self.x_dim[-1], kernel_size=(4, 4), padding='same', activation="relu")(h)
             decoder_model = Model(inputs=[self.z, self.decoder_labels], outputs=h, name=name)
             decoder_mmd_model = Model(inputs=[self.z, self.decoder_labels], outputs=h_mmd, name='deocder_mmd')
+            decoder_model.summary()
             return decoder_model, decoder_mmd_model
 
         elif self.arch_style == 2:  # FCN
@@ -226,6 +227,7 @@ class DCtrVAE:
             h = Reshape(target_shape=self.x_dim)(h)
             decoder_model = Model(inputs=[self.z, self.decoder_labels], outputs=h, name=name)
             decoder_mmd_model = Model(inputs=[self.z, self.decoder_labels], outputs=h_mmd, name='deocder_mmd')
+            decoder_model.summary()
             return decoder_model, decoder_mmd_model
         else:
             encode_y = Dense(128, activation='relu')(self.decoder_labels)
@@ -273,6 +275,7 @@ class DCtrVAE:
 
             decoder_model = Model(inputs=[self.z, self.decoder_labels], outputs=conv10, name=name)
             decoder_mmd_model = Model(inputs=[self.z, self.decoder_labels], outputs=h_mmd, name='deocder_mmd')
+            decoder_model.summary()
             return decoder_model, decoder_mmd_model
 
     def _create_network(self):
