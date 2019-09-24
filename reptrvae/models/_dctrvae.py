@@ -240,12 +240,12 @@ class DCtrVAE:
             h = Dense(1024, kernel_initializer='he_normal')(h_mmd)
             h = Activation('relu')(h)
 
-            h = Dense(256 * 4 * 4, kernel_initializer='he_normal')(h)
+            h = Dense(512 * 4 * 4, kernel_initializer='he_normal')(h)
             h = Activation('relu')(h)
 
-            width = self.x_dim[0] // 16
-            height = self.x_dim[1] // 16
-            n_channels = 4096 // (width * height)
+            width = 4
+            height = 4
+            n_channels = 512
             h = Reshape(target_shape=(width, height, n_channels))(h)
 
             conv6 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(h)
