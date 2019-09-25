@@ -182,10 +182,7 @@ class DCtrVAE:
                     A Tensor for last dense layer with the shape of [n_vars, ] to reconstruct data.
         """
         if self.arch_style == 1:  # Baseline CNN for MNIST
-            h = Dense(128, activation='relu')(self.decoder_labels)
-            h = Dense(np.prod(self.x_dim[:-1]), activation='relu')(h)
-            h = Reshape((*self.x_dim[:-1], 1))(h)
-            zy = concatenate([self.z, h])
+            zy = concatenate([self.z, self.decoder_labels], axis=1)
             h = Dense(self.mmd_dim, kernel_initializer=self.init_w, use_bias=False)(zy)
             h = BatchNormalization(axis=1)(h)
             h_mmd = LeakyReLU(name="mmd")(h)
