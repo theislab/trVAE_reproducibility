@@ -201,6 +201,10 @@ class DCtrVAE:
             h = LeakyReLU()(h)
             h = UpSampling2D(size=(2, 2))(h)
 
+            h = Conv2DTranspose(2, kernel_size=(4, 4), padding='same')(h)
+            h = LeakyReLU()(h)
+            h = UpSampling2D(size=(2, 2))(h)
+
             h = Conv2DTranspose(self.x_dim[-1], kernel_size=(4, 4), padding='same', activation="relu")(h)
             decoder_model = Model(inputs=[self.z, self.decoder_labels], outputs=h, name=name)
             decoder_mmd_model = Model(inputs=[self.z, self.decoder_labels], outputs=h_mmd, name='deocder_mmd')
