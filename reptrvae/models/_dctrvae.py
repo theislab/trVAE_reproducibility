@@ -187,15 +187,20 @@ class DCtrVAE:
             h = BatchNormalization(axis=1)(h)
             h_mmd = LeakyReLU(name="mmd")(h)
             h = Dropout(self.dr_rate)(h_mmd)
-            h = Dense(784, kernel_initializer=self.init_w, use_bias=False)(h)
+            h = Dense(256, kernel_initializer=self.init_w, use_bias=False)(h)
             h = BatchNormalization()(h)
             h = LeakyReLU()(h)
             h = Dropout(self.dr_rate)(h)
-            h = Reshape(target_shape=self.x_dim)(h)
-            h = Conv2DTranspose(128, kernel_size=(4, 4), padding='same')(h)
+            h = Reshape(target_shape=(2, 2, 64))(h)
+            h = UpSampling2D(size=(2, 2))(h)
+
+            h = Conv2DTranspose(64, kernel_size=(4, 4), padding='valid')(h)
             h = LeakyReLU()(h)
+
             h = Conv2DTranspose(64, kernel_size=(4, 4), padding='same')(h)
             h = LeakyReLU()(h)
+            h = UpSampling2D(size=(2, 2))(h)
+
             h = Conv2DTranspose(self.x_dim[-1], kernel_size=(4, 4), padding='same', activation="relu")(h)
             decoder_model = Model(inputs=[self.z, self.decoder_labels], outputs=h, name=name)
             decoder_mmd_model = Model(inputs=[self.z, self.decoder_labels], outputs=h_mmd, name='deocder_mmd')
