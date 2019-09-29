@@ -3,12 +3,12 @@ import os
 import wget
 
 url_dict = {
-    "haber_normalized": "https://hmgubox.helmholtz-muenchen.de/lib/96bd2d06-9efd-4731-8776-4d4e5b1ee3d3/file/haber_normalized.h5ad?dl=1",
-    "haber_count": "https://hmgubox.helmholtz-muenchen.de/lib/96bd2d06-9efd-4731-8776-4d4e5b1ee3d3/file/haber_count.h5ad?dl=1",
-    "kang_normalized": "https://hmgubox.helmholtz-muenchen.de/lib/96bd2d06-9efd-4731-8776-4d4e5b1ee3d3/file/kang_normalized.h5ad?dl=1",
-    "kang_count": "https://hmgubox.helmholtz-muenchen.de/lib/96bd2d06-9efd-4731-8776-4d4e5b1ee3d3/file/kang_count.h5ad?dl=1",
-    "celeba": "https://hmgubox.helmholtz-muenchen.de/lib/96bd2d06-9efd-4731-8776-4d4e5b1ee3d3/file/celeba_Smiling_32x32_50000.h5ad?dl=1",
-    "mnist": "https://hmgubox.helmholtz-muenchen.de/lib/96bd2d06-9efd-4731-8776-4d4e5b1ee3d3/file/thick_thin_mnist.h5ad?dl=1",
+    "haber_normalized": "https://drive.google.com/file/d/13d7B1yeHAlI1_AquBif1MRetzJx-hzyp/view?usp=sharing",
+    "haber_count": "https://drive.google.com/file/d/1lh_6oRcuBR2KUzDSkvcnZmrFHTMs_2eJ/view?usp=sharing",
+    "kang_normalized": "https://drive.google.com/file/d/1ZgzHQU5ubZdQT2o8psWTP0gh5PoJZlCD/view?usp=sharing",
+    "kang_count": "https://drive.google.com/file/d/1bd8R8hy8GL3QPgTVdHWtFqdPqbGUdLE9/view?usp=sharing",
+    "celeba": "https://drive.google.com/uc?export=download&confirm=mQTe&id=1TU46VNpIRTeYjkisvQyDMf_fCuH1EjQT",
+    "mnist": "https://drive.google.com/file/d/1U_AxtWnPn4pAS51-fHmpetQZeHbGJ2xN/view?usp=sharing",
 }
 
 
