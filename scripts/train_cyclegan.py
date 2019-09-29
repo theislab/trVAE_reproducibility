@@ -31,7 +31,7 @@ elif data_name == "kang":
     specific_cell_type = "NK"
     cell_type_key = "cell_type"
     condition_key = "condition"
-    control_condition = "control"
+    source_condition = "control"
     target_condition = "stimulated"
     target_conditions = ['stimulated']
     le = {"control": 0, "stimulated": 1}
