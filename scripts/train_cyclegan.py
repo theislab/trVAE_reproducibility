@@ -40,16 +40,18 @@ else:
 
 adata = sc.read(f"./data/{data_name}/{data_name}_normalized.h5ad")
 
-if adata.shape[0] > 2000:
+if adata.shape[1] > 2000:
     sc.pp.highly_variable_genes(adata, n_top_genes=2000)
     adata = adata[:, adata.var['highly_variable']]
 
 train_adata, valid_adata = train_test_split(adata, 0.80)
 
 net_train_adata = train_adata[
-    ~((train_adata.obs[cell_type_key] == specific_cell_type) & (train_adata.obs[condition_key].isin(target_conditions)))]
+    ~((train_adata.obs[cell_type_key] == specific_cell_type) & (
+        train_adata.obs[condition_key].isin(target_conditions)))]
 net_valid_adata = valid_adata[
-    ~((valid_adata.obs[cell_type_key] == specific_cell_type) & (valid_adata.obs[condition_key].isin(target_conditions)))]
+    ~((valid_adata.obs[cell_type_key] == specific_cell_type) & (
+        valid_adata.obs[condition_key].isin(target_conditions)))]
 
 model = CycleGAN(train_adata.shape[1], z_dimension=40)
 
