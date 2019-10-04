@@ -4,7 +4,7 @@ import os
 import anndata
 import keras
 import numpy as np
-from keras.layers import Input, Dense, BatchNormalization, LeakyReLU, Dropout
+from keras.layers import Input, Dense, BatchNormalization, LeakyReLU, Dropout, ReLU
 from keras.models import Model, load_model
 from keras.optimizers import Adam
 
@@ -47,13 +47,13 @@ class CycleGAN(Network):
         self.lambda_l1 = kwargs.get("lambda_l1", 0.0)
         self.lambda_l2 = kwargs.get("lambda_l2", 0.0)
         self.lr = kwargs.get("learning_rate", 0.001)
-        self.dr_rate = kwargs.get("dropout_rate", 0.2)
+        self.dr_rate = kwargs.get("dropout_rate", 0.5)
         self.output_activation = kwargs.get("output_activation", 'relu')
 
         self.x = Input(shape=(self.x_dimension,), name="data")
         self.z = Input(shape=(self.z_dimension,), name='latent')
 
-        self.init_w = keras.initializers.glorot_normal()
+        self.init_w = keras.initializers.truncated_normal(stddev=0.02)
         self.regularizer = keras.regularizers.l1_l2(self.lambda_l1, self.lambda_l2)
         self.aux_models = {}
 
@@ -61,7 +61,7 @@ class CycleGAN(Network):
         self.__compile_network()
 
     def __build_discriminator(self, name):
-        h = Dense(800, kernel_initializer=self.init_w, kernel_regularizer=self.regularizer, use_bias=False)(self.x)
+        h = Dense(700, kernel_initializer=self.init_w, kernel_regularizer=self.regularizer, use_bias=False)(self.x)
         h = BatchNormalization(axis=1, trainable=True)(h)
         h = LeakyReLU()(h)
         h = Dropout(self.dr_rate)(h)
@@ -81,12 +81,12 @@ class CycleGAN(Network):
         return discriminator
 
     def __build_generator(self, name):
-        h = Dense(800, kernel_initializer=self.init_w, kernel_regularizer=self.regularizer, use_bias=False)(self.x)
+        h = Dense(700, kernel_initializer=self.init_w, kernel_regularizer=self.regularizer, use_bias=False)(self.x)
         h = BatchNormalization(axis=1, trainable=True)(h)
         h = LeakyReLU()(h)
         h = Dropout(self.dr_rate)(h)
 
-        h = Dense(800, kernel_initializer=self.init_w, kernel_regularizer=self.regularizer, use_bias=False)(h)
+        h = Dense(100, kernel_initializer=self.init_w, kernel_regularizer=self.regularizer, use_bias=False)(h)
         h = BatchNormalization(axis=1, trainable=True)(h)
         h = LeakyReLU()(h)
         h = Dropout(self.dr_rate)(h)
@@ -97,12 +97,12 @@ class CycleGAN(Network):
         h_z = LeakyReLU()(h)
         h = Dropout(self.dr_rate)(h_z)
 
-        h = Dense(800, kernel_initializer=self.init_w, kernel_regularizer=self.regularizer, use_bias=False)(h)
+        h = Dense(100, kernel_initializer=self.init_w, kernel_regularizer=self.regularizer, use_bias=False)(h)
         h = BatchNormalization(axis=1, trainable=True)(h)
         h = LeakyReLU()(h)
         h = Dropout(self.dr_rate)(h)
 
-        h = Dense(800, kernel_initializer=self.init_w, kernel_regularizer=self.regularizer, use_bias=False)(h)
+        h = Dense(700, kernel_initializer=self.init_w, kernel_regularizer=self.regularizer, use_bias=False)(h)
         h = BatchNormalization(axis=1, trainable=True)(h)
         h = LeakyReLU()(h)
         h = Dropout(self.dr_rate)(h)
@@ -110,7 +110,7 @@ class CycleGAN(Network):
         h = Dense(self.x_dimension, kernel_initializer=self.init_w, kernel_regularizer=self.regularizer,
                   use_bias=False)(h)
         h = BatchNormalization(axis=1, trainable=True)(h)
-        h = LeakyReLU()(h)
+        h = ReLU()(h)
 
         generator = Model(self.x, h, name=name)
         self.aux_models[f"{name}_latent"] = Model(self.x, h_z, name=f"{name}_latent")
@@ -150,8 +150,8 @@ class CycleGAN(Network):
                                        img_A_id, img_B_id])
 
         self.combined.compile(loss=['mse', 'mse',
-                                    'mae', 'mae',
-                                    'mae', 'mae'],
+                                    'mse', 'mse',
+                                    'mse', 'mse'],
                               loss_weights=[1, 1,
                                             self.lambda_cycle, self.lambda_cycle,
                                             self.lambda_id, self.lambda_id],
