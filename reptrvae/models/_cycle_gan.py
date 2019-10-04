@@ -174,7 +174,7 @@ class CycleGAN(Network):
 
         latent = self.aux_models['gen_AB_latent'].predict(adata.X)
         latent_adata = anndata.AnnData(X=latent)
-        latent_adata.obs = adata.obs(deep=True)
+        latent_adata.obs = adata.obs.copy(deep=True)
 
         return latent_adata
 
@@ -186,7 +186,7 @@ class CycleGAN(Network):
 
         reconstructed = self.g_AB.predict(source_adata.X)
         reconstructed_adata = anndata.AnnData(X=reconstructed)
-        reconstructed_adata.obs = cell_type_adata.obs(deep=True)
+        reconstructed_adata.obs = cell_type_adata.obs.copy(deep=True)
         reconstructed_adata.var_names = cell_type_adata.var_names
 
         return reconstructed_adata
