@@ -186,7 +186,7 @@ class CycleGAN(Network):
 
         reconstructed = self.g_AB.predict(source_adata.X)
         reconstructed_adata = anndata.AnnData(X=reconstructed)
-        reconstructed_adata.obs = cell_type_adata.obs.copy(deep=True)
+        reconstructed_adata.obs = source_adata.obs.copy(deep=True)
         reconstructed_adata.var_names = cell_type_adata.var_names
 
         return reconstructed_adata
