@@ -6,6 +6,7 @@ import scanpy as sc
 import reptrvae
 
 data_name = sys.argv[1]
+# specific_cell_type = sys.argv[2]
 
 if data_name == "haber":
     conditions = ["Control", "Hpoly.Day10"]
@@ -43,6 +44,7 @@ net_train_adata = train_adata[
 net_valid_adata = valid_adata[
     ~((valid_adata.obs[cell_type_key] == specific_celltype) & (valid_adata.obs[condition_key].isin(target_conditions)))]
 
+
 network = reptrvae.models.trVAE(x_dimension=net_train_adata.shape[1],
                                 z_dimension=40,
                                 n_conditions=len(net_train_adata.obs[condition_key].unique()),
@@ -67,6 +69,7 @@ network.train(net_train_adata,
               early_stop_limit=500,
               lr_reducer=350,
               shuffle=True,
+              retrain=False,
               )
 
 train_labels, _ = reptrvae.tl.label_encoder(net_train_adata, labelencoder, condition_key)
@@ -74,6 +77,7 @@ mmd_adata = network.to_mmd_layer(net_train_adata, train_labels, feed_fake=-1)
 
 cell_type_adata = adata[adata.obs[cell_type_key] == specific_celltype]
 source_adata = cell_type_adata[cell_type_adata.obs[condition_key] == source_condition]
+target_adata = cell_type_adata[cell_type_adata.obs[condition_key] == target_condition]
 source_labels = np.zeros(source_adata.shape[0]) + labelencoder[source_condition]
 target_labels = np.zeros(source_adata.shape[0]) + labelencoder[target_condition]
 
@@ -82,11 +86,13 @@ pred_adata = network.predict(source_adata,
                              decoder_labels=target_labels,
                              )
 
-pred_adata.obs[condition_key] = [f"{specific_celltype}_pred_{target_condition}"] * pred_adata.shape[0]
+pred_adata.obs[condition_key] = [f"{source_condition}_to_{target_condition}"] * pred_adata.shape[0]
+pred_adata.obs[cell_type_key] = specific_celltype
 
-pred_adata.write_h5ad(f"./data/reconstructed/{data_name}/trVAE-{specific_celltype}.h5ad")
+adata_to_write = pred_adata.concatenate(target_adata)
+adata_to_write.write_h5ad(f"./data/reconstructed/trVAE_{data_name}/{specific_celltype}.h5ad")
 
-reptrvae.pl.plot_umap(mmd_adata,
-                      condition_key, cell_type_key,
-                      frameon=False, path_to_save=f"./results/{data_name}/", model_name="trVAE_MMD",
-                      ext="png")
+# reptrvae.pl.plot_umap(mmd_adata,
+#                       condition_key, cell_type_key,
+#                       frameon=False, path_to_save=f"./results/{data_name}/", model_name="trVAE_MMD",
+#                       ext="png")

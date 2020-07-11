@@ -56,9 +56,9 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
         network.train(net_train_adata, use_validation=True, valid_data=net_valid_adata, n_epochs=n_epochs,
                       batch_size=batch_size, save=True,
                       verbose=2, early_stop_limit=5)
-        mmd_adata = network.to_latent(net_train_adata)
-        plot_umap(mmd_adata, condition_key, cell_type_key, False,
-                  path_to_save=f"./results/{data_name}/", model_name="scGen_MMD")
+#         mmd_adata = network.to_latent(net_train_adata)
+#         plot_umap(mmd_adata, condition_key, cell_type_key, False,
+#                   path_to_save=f"./results/{data_name}/", model_name="scGen_MMD")
         print(f"network_{cell_type} has been trained!")
 
 
@@ -112,7 +112,7 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
                                                 cell_type_key: [cell_type] * len(pred)},
                                      var={"var_names": cell_type_data.var_names})
         ctrl_adata = anndata.AnnData(cell_type_ctrl_data.X,
-                                     obs={condition_key: [f"{cell_type}_ctrl"] * len(cell_type_ctrl_data),
+                                     obs={condition_key: [f"{cell_type}_real_ctrl"] * len(cell_type_ctrl_data),
                                           cell_type_key: [cell_type] * len(cell_type_ctrl_data)},
                                      var={"var_names": cell_type_ctrl_data.var_names})
         if sparse.issparse(cell_type_data.X):
@@ -140,13 +140,13 @@ if __name__ == '__main__':
     if data_name == "haber":
         specific_cell_type = "Tuft"
     elif data_name == "kang":
-        specific_cell_type = "NK"
+        specific_cell_type = None
     elif data_name == "species":
         specific_cell_type = "rat"
     else:
         raise Exception("Invalid data name!")
 
-    test_train_whole_data_one_celltype_out(data_name, z_dim=100, alpha=0.00005, n_epochs=300, batch_size=32,
-                                           dropout_rate=0.2, learning_rate=0.001, cell_type_to_train=specific_cell_type)
+#     test_train_whole_data_one_celltype_out(data_name, z_dim=100, alpha=0.00005, n_epochs=100, batch_size=32,
+#                                            dropout_rate=0.2, learning_rate=0.001, cell_type_to_train=specific_cell_type)
 
     reconstruct_whole_data(data_name, cell_type_to_predict=specific_cell_type)
