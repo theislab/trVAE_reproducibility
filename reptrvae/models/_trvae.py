@@ -323,7 +323,7 @@ class trVAE(Network):
               condition_encoder=None, condition_key='condition',
               n_epochs=10000, batch_size=1024,
               early_stop_limit=300, lr_reducer=250, threshold=0.0, monitor='val_loss',
-              shuffle=True, verbose=0, save=True):
+              shuffle=True, verbose=0, save=True, retrain=True):
         """
             Trains the network `n_epochs` times with given `train_data`
             and validates the model using validation_data if it was given
@@ -377,6 +377,11 @@ class trVAE(Network):
             fit_verbose = 0
         else:
             fit_verbose = verbose
+            
+        if retrain is False and os.path.exists(os.path.join(self.model_to_use, 'mmd_cvae.h5')):
+            self.restore_model()
+            print("Model has been successfully restored!")
+            return
 
         if sparse.issparse(train_adata.X):
             train_adata.X = train_adata.X.A
