@@ -65,15 +65,15 @@ python -m scripts.train_scVI kang[haber]
 ## Data Analysis
 Study       | notebook path     
 ---------------| ---------------
-| [*Haber et. al*](https://nbviewer.jupyter.org/github/Naghipourfar/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/Haber.ipynb)| Jupyter Notebooks/Fig2.ipynb| 
-| [*Kang et. al*](https://nbviewer.jupyter.org/github/Naghipourfar/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/Kang.ipynb)| Jupyter Notebooks/Fig3.ipynb| 
-| [*CelebA*](https://nbviewer.jupyter.org/github/Naghipourfar/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/CelebA.ipynb)| Jupyter Notebooks/Fig5.ipynb| 
+| [*Haber et. al*](https://nbviewer.jupyter.org/github/Naghipourfar/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/Haber.ipynb)| Jupyter Notebooks/Haber.ipynb| 
+| [*Kang et. al*](https://nbviewer.jupyter.org/github/Naghipourfar/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/Kang.ipynb)| Jupyter Notebooks/Kang.ipynb| 
+| [*CelebA*](https://nbviewer.jupyter.org/github/Naghipourfar/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/CelebA.ipynb)| Jupyter Notebooks/CelebA.ipynb| 
 
 ## Paper Plots 
 Figures  | notebook path     
 ---------------| ---------------
-| [*Method Comparison - Haber et. al*](https://nbviewer.jupyter.org/github/Naghipourfar/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/HaberComparison.ipynb)| Jupyter Notebooks/Fig2.ipynb| 
-| [*Method Comparison - Kang et. al*](https://nbviewer.jupyter.org/github/Naghipourfar/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/KangComparison.ipynb)| Jupyter Notebooks/Fig3.ipynb| 
+| [*Method Comparison - Haber et. al*](https://nbviewer.jupyter.org/github/Naghipourfar/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/methodComparison-Haber.ipynb)| Jupyter Notebooks/methodComparison-Haber.ipynb| 
+| [*Method Comparison - Kang et. al*](https://nbviewer.jupyter.org/github/Naghipourfar/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/methodComparison-Kang.ipynb)| Jupyter Notebooks/methodComparison-Kang.ipynb| 
 
 To run the notebooks and scripts you need following packages :
 
