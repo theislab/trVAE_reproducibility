@@ -115,63 +115,66 @@ class SAUCIE_BACKEND(object):
     def _build_layers(self):
         """Construct the layers of SAUCIE."""
         if self.lambda_b:
-            h1 = tf.layers.dense(self.x, self.layers[0], activation=lrelu, name='encoder0', use_bias=True)
+            with tf.variable_scope("saucie", reuse=tf.AUTO_REUSE):
+                h1 = tf.layers.dense(self.x, self.layers[0], activation=lrelu, name='encoder0', use_bias=True)
 
-            h2 = tf.layers.dense(h1, self.layers[1], activation=lrelu, name='encoder1', use_bias=True)
+                h2 = tf.layers.dense(h1, self.layers[1], activation=lrelu, name='encoder1', use_bias=True)
 
-            h3 = tf.layers.dense(h2, self.layers[2], activation=lrelu, name='encoder2', use_bias=True)
+                h3 = tf.layers.dense(h2, self.layers[2], activation=lrelu, name='encoder2', use_bias=True)
 
-            self.embedded = tf.layers.dense(h3, 2, activation=tf.identity, name='embedding', use_bias=True)
-            self.embedded = nameop(self.embedded, 'embeddings')
+                self.embedded = tf.layers.dense(h3, 2, activation=tf.identity, name='embedding', use_bias=True)
+                self.embedded = nameop(self.embedded, 'embeddings')
 
-            h5 = tf.layers.dense(self.embedded, self.layers[2], activation=lrelu, name='decoder0', use_bias=True)
-            h5 = nameop(h5, 'mmd')
-            h6 = tf.layers.dense(h5, self.layers[1], activation=lrelu, name='decoder1', use_bias=True)
+                h5 = tf.layers.dense(self.embedded, self.layers[2], activation=lrelu, name='decoder0', use_bias=True)
+                h5 = nameop(h5, 'mmd')
+                h6 = tf.layers.dense(h5, self.layers[1], activation=lrelu, name='decoder1', use_bias=True)
 
-            h7 = tf.layers.dense(h6, self.layers[0], activation=lrelu, name='decoder2', use_bias=True)
-            h7 = nameop(h7, 'layer_c')
+                h7 = tf.layers.dense(h6, self.layers[0], activation=lrelu, name='decoder2', use_bias=True)
+                h7 = nameop(h7, 'layer_c')
 
-            self.reconstructed = tf.layers.dense(h7, self.input_dim, activation=tf.identity, name='recon', use_bias=True)
-            self.reconstructed = nameop(self.reconstructed, 'output')
+                self.reconstructed = tf.layers.dense(h7, self.input_dim, activation=tf.identity, name='recon', use_bias=True)
+                self.reconstructed = nameop(self.reconstructed, 'output')
         elif self.lambda_c:
-            h1 = tf.layers.dense(self.x, self.layers[0], activation=lrelu, name='encoder0', use_bias=True)
+            with tf.variable_scope("saucie", reuse=tf.AUTO_REUSE):
+                h1 = tf.layers.dense(self.x, self.layers[0], activation=lrelu, name='encoder0', use_bias=True)
 
-            h2 = tf.layers.dense(h1, self.layers[1], activation=lrelu, name='encoder1', use_bias=True)
+                h2 = tf.layers.dense(h1, self.layers[1], activation=lrelu, name='encoder1', use_bias=True)
 
-            h3 = tf.layers.dense(h2, self.layers[2], activation=lrelu, name='encoder2', use_bias=True)
+                h3 = tf.layers.dense(h2, self.layers[2], activation=lrelu, name='encoder2', use_bias=True)
 
-            self.embedded = tf.layers.dense(h3, self.layers[3], activation=tf.identity, name='embedding', use_bias=True)
-            self.embedded = nameop(self.embedded, 'embeddings')
+                self.embedded = tf.layers.dense(h3, self.layers[3], activation=tf.identity, name='embedding', use_bias=True)
+                self.embedded = nameop(self.embedded, 'embeddings')
 
-            h5 = tf.layers.dense(self.embedded, self.layers[2], activation=lrelu, name='decoder0', use_bias=True)
-            h5 = nameop(h5, 'mmd')
-            h6 = tf.layers.dense(h5, self.layers[1], activation=lrelu, name='decoder1', use_bias=True)
+                h5 = tf.layers.dense(self.embedded, self.layers[2], activation=lrelu, name='decoder0', use_bias=True)
+                h5 = nameop(h5, 'mmd')
+                h6 = tf.layers.dense(h5, self.layers[1], activation=lrelu, name='decoder1', use_bias=True)
 
-            h7 = tf.layers.dense(h6, self.layers[0], activation=tf.nn.relu, name='decoder2', use_bias=True)
-            h7 = nameop(h7, 'layer_c')
+                h7 = tf.layers.dense(h6, self.layers[0], activation=tf.nn.relu, name='decoder2', use_bias=True)
+                h7 = nameop(h7, 'layer_c')
 
-            self.reconstructed = tf.layers.dense(h7, self.input_dim, activation=tf.identity, name='recon', use_bias=True)
-            self.reconstructed = nameop(self.reconstructed, 'output')
+                self.reconstructed = tf.layers.dense(h7, self.input_dim, activation=tf.identity, name='recon', use_bias=True)
+                self.reconstructed = nameop(self.reconstructed, 'output')
         else:
-            h1 = tf.layers.dense(self.x, self.layers[0], activation=lrelu, name='encoder0')
+            with tf.variable_scope("saucie", reuse=tf.AUTO_REUSE):
+                h1 = tf.layers.dense(self.x, self.layers[0], activation=lrelu, name='encoder0')
 
-            h2 = tf.layers.dense(h1, self.layers[1], activation=tf.nn.sigmoid, name='encoder1')
+                h2 = tf.layers.dense(h1, self.layers[1], activation=tf.nn.sigmoid, name='encoder1')
 
-            h3 = tf.layers.dense(h2, self.layers[2], activation=lrelu, name='encoder2')
+                h3 = tf.layers.dense(h2, self.layers[2], activation=lrelu, name='encoder2')
 
-            self.embedded = tf.layers.dense(h3, self.layers[3], activation=tf.identity, name='embedding')
-            self.embedded = nameop(self.embedded, 'embeddings')
+                self.embedded = tf.layers.dense(h3, self.layers[3], activation=tf.identity, name='embedding')
+                self.embedded = nameop(self.embedded, 'embeddings')
 
-            h5 = tf.layers.dense(self.embedded, self.layers[2], activation=lrelu, name='decoder0')
-            h5 = nameop(h5, 'mmd')
-            h6 = tf.layers.dense(h5, self.layers[1], activation=lrelu, name='decoder1')
+                h5 = tf.layers.dense(self.embedded, self.layers[2], activation=lrelu, name='decoder0')
+                h5 = nameop(h5, 'mmd')
+                h6 = tf.layers.dense(h5, self.layers[1], activation=lrelu, name='decoder1')
 
-            h7 = tf.layers.dense(h6, self.layers[0], activation=lrelu, name='decoder2')
-            h7 = nameop(h7, 'layer_c')
+                h7 = tf.layers.dense(h6, self.layers[0], activation=lrelu, name='decoder2')
+                h7 = nameop(h7, 'layer_c')
 
 
-            self.reconstructed = tf.layers.dense(h7, self.input_dim, activation=tf.identity, name='recon')
-            self.reconstructed = nameop(self.reconstructed, 'output')
+                self.reconstructed = tf.layers.dense(h7, self.input_dim, activation=tf.identity, name='recon')
+                self.reconstructed = nameop(self.reconstructed, 'output')
 
     def _build_losses(self):
         """Build all the loss ops for the network."""
@@ -204,7 +207,8 @@ class SAUCIE_BACKEND(object):
     def _build_optimization(self, norm_clip=5.):
         """Build all the optimization ops for the network."""
         opt = tf.train.AdamOptimizer(self.learning_rate)
-        self.train_op = opt.minimize(self.loss, name='train_op')
+        with tf.variable_scope('optimization', reuse=tf.AUTO_REUSE):
+            self.train_op = opt.minimize(self.loss, name='train_op')
 
     def _build_reconstruction_loss(self, reconstructed, y):
         """
@@ -412,7 +416,7 @@ class SAUCIE_BACKEND(object):
             if (self.lambda_b and len(batch) < 2):
                 raise Exception("If using lambda_b (batch correction), you must provide each point's batch as a label")
 
-            ops = [obn('train_op')]
+            ops = [obn('optimization/train_op')]
 
             self.sess.run(ops, feed_dict=feed)
 
@@ -574,12 +578,12 @@ class SAUCIE_BACKEND(object):
 
     def get_embedding(self, load):
         """Return the embedding layer."""
-        embedding = self.get_layer(load, 'embeddings')
+        embedding = self.get_layer(load, 'saucie/embeddings')
         return embedding
 
     def get_reconstruction(self, load):
         """Return the reconstruction layer."""
-        reconstruction = self.get_layer(load, 'output')
+        reconstruction = self.get_layer(load, 'saucie/output')
         return reconstruction
 
 

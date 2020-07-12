@@ -73,9 +73,9 @@ class scVI(Network):
         real_adata.obs['batch_indices'] = le.transform(real_adata.obs[condition_key].values)
         ctrl_adata.obs['batch_indices'] = le.transform([target_condition] * ctrl_adata.shape[0])
 
-        ctrl_adata = AnnDatasetFromAnnData(ctrl_adata)
+        net_ctrl_adata = AnnDatasetFromAnnData(ctrl_adata)
 
-        posterior = self.trainer.create_posterior(self.trainer.model, ctrl_adata, indices=np.arange(len(ctrl_adata)))
+        posterior = self.trainer.create_posterior(self.trainer.model, net_ctrl_adata, indices=np.arange(len(net_ctrl_adata)))
 
         generated_samples, _ = posterior.sequential().generate(n_generated_samples)
 
@@ -94,7 +94,7 @@ class scVI(Network):
         sc.pp.log1p(pred_adata)
         return pred_adata
 
-    def train(self, adata, condition_key, cell_type_key, n_epochs=300, patience=30, lr_reducer=20):
+    def train(self, adata, condition_key, cell_type_key, n_epochs=300, patience=10, lr_reducer=7):
         le = LabelEncoder()
         adata.obs['labels'] = le.fit_transform(adata.obs[cell_type_key].values)
         adata.obs['batch_indices'] = le.fit_transform(adata.obs[condition_key].values)
