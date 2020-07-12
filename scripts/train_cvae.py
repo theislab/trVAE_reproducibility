@@ -11,7 +11,10 @@ data_name = sys.argv[1]
 
 if data_name == "haber":
     keys = ["Control", "Hpoly.Day10"]
-    specific_cell_type = "Tuft"
+    if len(sys.argv) == 3:
+        specific_cell_type = sys.argv[2]
+    else:
+        specific_cell_type = "Tuft"
     cell_type_key = "cell_label"
     condition_key = "condition"
     control_condition = "Control"
@@ -21,7 +24,10 @@ if data_name == "haber":
 
 elif data_name == "species":
     keys = ["unst", "LPS6"]
-    specific_cell_type = "rat"
+    if len(sys.argv) == 3:
+        specific_cell_type = sys.argv[2]
+    else:
+        specific_cell_type = "rat"
     cell_type_key = "species"
     condition_key = "condition"
     control_condition = "unst"
@@ -30,7 +36,10 @@ elif data_name == "species":
     le = {"unst": 0, "LPS6": 1}
 elif data_name == "kang":
     keys = ["control", "stimulated"]
-    specific_cell_type = "NK"
+    if len(sys.argv) == 3:
+        specific_cell_type = sys.argv[2]
+    else:
+        specific_cell_type = "NK"
     cell_type_key = "cell_type"
     condition_key = "condition"
     control_condition = "control"
@@ -40,7 +49,7 @@ elif data_name == "kang":
 else:
     raise Exception("Invalid data name")
 
-adata = sc.read(f"./data/{data_name}/{data_name}_normalized.h5ad")
+adata = sc.read(f"/home/mohsen/data/{data_name}/{data_name}_normalized.h5ad")
 adata = adata.copy()[adata.obs[condition_key].isin(keys)]
 
 if adata.shape[1] > 2000:
@@ -49,46 +58,92 @@ if adata.shape[1] > 2000:
 
 train_adata, valid_adata = train_test_split(adata, 0.80)
 
-net_train_adata = train_adata[
-    ~((train_adata.obs[cell_type_key] == specific_cell_type) & (
-        train_adata.obs[condition_key].isin(target_conditions)))]
-net_valid_adata = valid_adata[
-    ~((valid_adata.obs[cell_type_key] == specific_cell_type) & (
-        valid_adata.obs[condition_key].isin(target_conditions)))]
+if specific_cell_type == 'all':
+    for specific_cell_type in adata.obs[cell_type_key].unique().tolist():
+        net_train_adata = train_adata[
+            ~((train_adata.obs[cell_type_key] == specific_cell_type) & (
+                train_adata.obs[condition_key].isin(target_conditions)))]
+        net_valid_adata = valid_adata[
+            ~((valid_adata.obs[cell_type_key] == specific_cell_type) & (
+                valid_adata.obs[condition_key].isin(target_conditions)))]
 
-z_dim = 100
-network = CVAE(x_dimension=net_train_adata.X.shape[1],
-               z_dimension=z_dim,
-               alpha=0.1,
-               model_path=f"../models/CVAE/{data_name}/{specific_cell_type}/cvae")
+        z_dim = 100
+        network = CVAE(x_dimension=net_train_adata.X.shape[1],
+                       z_dimension=z_dim,
+                       alpha=0.1,
+                       model_path=f"./models/CVAE/{data_name}/{specific_cell_type}/cvae")
 
-network.train(net_train_adata,
-              use_validation=True,
-              valid_data=net_valid_adata,
-              n_epochs=120)
+        network.train(net_train_adata,
+                      use_validation=True,
+                      valid_data=net_valid_adata,
+                      n_epochs=120)
 
-train_labels, _ = label_encoder(train_adata, le, 'condition')
-cell_type_adata = train_adata[train_adata.obs[cell_type_key] == specific_cell_type]
+        train_labels, _ = label_encoder(train_adata, le, 'condition')
+        cell_type_adata = train_adata[train_adata.obs[cell_type_key] == specific_cell_type]
 
-unperturbed_data = cell_type_adata[cell_type_adata.obs[condition_key] == control_condition]
-target_labels = np.zeros((len(unperturbed_data), 1)) + le[target_condition]
-source_labels = np.zeros((len(unperturbed_data), 1)) + le[control_condition]
-pred_adata = network.predict(unperturbed_data, source_labels, target_labels)
-pred_adata.obs[condition_key] = [f"{specific_cell_type}_pred_{target_condition}"] * len(target_labels)
-pred_adata.obs['method'] = 'CVAE'
-pred_adata.write(f"./data/reconstructed/{data_name}/CVAE-{specific_cell_type}.h5ad")
+        unperturbed_data = cell_type_adata[cell_type_adata.obs[condition_key] == control_condition]
+        target_labels = np.zeros((len(unperturbed_data), 1)) + le[target_condition]
+        source_labels = np.zeros((len(unperturbed_data), 1)) + le[control_condition]
+        pred_adata = network.predict(unperturbed_data, source_labels, target_labels)
+        pred_adata.obs[condition_key] = [f"{specific_cell_type}_pred_{target_condition}"] * len(target_labels)
+        pred_adata.obs['method'] = 'CVAE'
+        pred_adata.write(f"/home/mohsen/data/trvae/reconstructed/{data_name}/CVAE-{specific_cell_type}.h5ad")
 
-print("Model has been trained")
+        print(f"Model has been trained for {specific_cell_type}.")
 
-sc.settings.figdir = f"../results/{data_name}/"
+        # sc.settings.figdir = f"../results/{data_name}/"
 
-encoder_labels, _ = label_encoder(net_train_adata, condition_key=condition_key)
-decoder_labels = encoder_labels
+        # encoder_labels, _ = label_encoder(net_train_adata, condition_key=condition_key)
+        # decoder_labels = encoder_labels
 
-latent_adata = network.to_latent(net_train_adata, encoder_labels)
-mmd_latent_adata = network.to_mmd_layer(net_train_adata, encoder_labels, decoder_labels)
+        # latent_adata = network.to_latent(net_train_adata, encoder_labels)
+        # mmd_latent_adata = network.to_mmd_layer(net_train_adata, encoder_labels, decoder_labels)
 
-print("Latents has been computed")
-plot_umap(mmd_latent_adata, condition_key, cell_type_key, False,
-          path_to_save=f"./results/{data_name}/", model_name="CVAE_MMD", ext="png")
-print("Latents has been plotted and saved")
+        # print("Latents has been computed")
+        # plot_umap(mmd_latent_adata, condition_key, cell_type_key, False,
+        #           path_to_save=f"./results/{data_name}/", model_name="CVAE_MMD", ext="png")
+        # print("Latents has been plotted and saved")
+else:
+    net_train_adata = train_adata[
+            ~((train_adata.obs[cell_type_key] == specific_cell_type) & (
+                train_adata.obs[condition_key].isin(target_conditions)))]
+    net_valid_adata = valid_adata[
+        ~((valid_adata.obs[cell_type_key] == specific_cell_type) & (
+                valid_adata.obs[condition_key].isin(target_conditions)))]
+
+    z_dim = 100
+    network = CVAE(x_dimension=net_train_adata.X.shape[1],
+                       z_dimension=z_dim,
+                       alpha=0.1,
+                       model_path=f"./models/CVAE/{data_name}/{specific_cell_type}/cvae")
+
+    network.train(net_train_adata,
+                  use_validation=True,
+                  valid_data=net_valid_adata,
+                  n_epochs=120)
+
+    train_labels, _ = label_encoder(train_adata, le, 'condition')
+    cell_type_adata = train_adata[train_adata.obs[cell_type_key] == specific_cell_type]
+
+    unperturbed_data = cell_type_adata[cell_type_adata.obs[condition_key] == control_condition]
+    target_labels = np.zeros((len(unperturbed_data), 1)) + le[target_condition]
+    source_labels = np.zeros((len(unperturbed_data), 1)) + le[control_condition]
+    pred_adata = network.predict(unperturbed_data, source_labels, target_labels)
+    pred_adata.obs[condition_key] = [f"{specific_cell_type}_pred_{target_condition}"] * len(target_labels)
+    pred_adata.obs['method'] = 'CVAE'
+    pred_adata.write(f"/home/mohsen/data/trvae/reconstructed/{data_name}/CVAE-{specific_cell_type}.h5ad")
+
+    print(f"Model has been trained for {specific_cell_type}.")
+
+    # sc.settings.figdir = f"../results/{data_name}/"
+
+    # encoder_labels, _ = label_encoder(net_train_adata, condition_key=condition_key)
+    # decoder_labels = encoder_labels
+
+    # latent_adata = network.to_latent(net_train_adata, encoder_labels)
+    # mmd_latent_adata = network.to_mmd_layer(net_train_adata, encoder_labels, decoder_labels)
+
+    # print("Latents has been computed")
+    # plot_umap(mmd_latent_adata, condition_key, cell_type_key, False,
+    #           path_to_save=f"./results/{data_name}/", model_name="CVAE_MMD", ext="png")
+    # print("Latents has been plotted and saved")

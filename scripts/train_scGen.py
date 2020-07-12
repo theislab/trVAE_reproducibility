@@ -29,7 +29,7 @@ def test_train_whole_data_one_celltype_out(data_name="pbmc",
         stim_keys = ["stimulated"]
         cell_type_key = "cell_type"
 
-    adata = sc.read(f"./data/{data_name}/{data_name}_normalized.h5ad")
+    adata = sc.read(f"/home/mohsen/data/{data_name}/{data_name}_normalized.h5ad")
     adata = adata.copy()[adata.obs[condition_key].isin(keys)]
 
     if adata.shape[1] > 2000:
@@ -79,7 +79,7 @@ def reconstruct_whole_data(data_name="pbmc", condition_key="condition", cell_typ
         ctrl_key = "control"
         cell_type_key = "cell_type"
 
-    adata = sc.read(f"./data/{data_name}/{data_name}_normalized.h5ad")
+    adata = sc.read(f"/home/mohsen/data/{data_name}/{data_name}_normalized.h5ad")
     adata = adata.copy()[adata.obs[condition_key].isin(keys)]
 
     if adata.shape[1] > 2000:
@@ -138,15 +138,24 @@ if __name__ == '__main__':
     data_name = sys.argv[1]
 
     if data_name == "haber":
-        specific_cell_type = "Tuft"
+        if len(sys.argv) == 3:
+            specific_cell_type = sys.argv[2]
+        else:
+            specific_cell_type = "Tuft"
     elif data_name == "kang":
-        specific_cell_type = None
+        if len(sys.argv) == 3:
+            specific_cell_type = sys.argv[2]
+        else:
+            specific_cell_type = None
     elif data_name == "species":
-        specific_cell_type = "rat"
+        if len(sys.argv) == 3:
+            specific_cell_type = sys.argv[2]
+        else:
+            specific_cell_type = "rat"
     else:
         raise Exception("Invalid data name!")
 
-#     test_train_whole_data_one_celltype_out(data_name, z_dim=100, alpha=0.00005, n_epochs=100, batch_size=32,
-#                                            dropout_rate=0.2, learning_rate=0.001, cell_type_to_train=specific_cell_type)
+    test_train_whole_data_one_celltype_out(data_name, z_dim=100, alpha=0.00005, n_epochs=100, batch_size=32,
+                                           dropout_rate=0.2, learning_rate=0.001, cell_type_to_train=specific_cell_type)
 
     reconstruct_whole_data(data_name, cell_type_to_predict=specific_cell_type)

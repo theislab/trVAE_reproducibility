@@ -37,7 +37,10 @@ if data_name == "haber":
     labelencoder = {"Control": 0, "Hpoly.Day10": 1}
     cell_type_key = "cell_label"
     condition_key = "condition"
-    specific_celltype = "Tuft"
+    if len(sys.argv) == 3:
+        specific_celltype = sys.argv[2]
+    else:
+        specific_celltype = "Tuft"
 
 elif data_name == "kang":
     conditions = ["control", "stimulated"]
@@ -47,11 +50,14 @@ elif data_name == "kang":
     labelencoder = {"control": 0, "stimulated": 1}
     cell_type_key = "cell_type"
     condition_key = "condition"
-    specific_celltype = "NK"
+    if len(sys.argv) == 3:
+        specific_celltype = sys.argv[2]
+    else:
+        specific_celltype = "NK"
 else:
     raise Exception("InValid data name")
 
-adata = sc.read(f"./data/{data_name}/{data_name}_normalized.h5ad")
+adata = sc.read(f"/home/mohsen/data/{data_name}/{data_name}_normalized.h5ad")
 adata = adata.copy()[adata.obs[condition_key].isin(conditions)]
 
 if adata.shape[1] > 2000:
@@ -59,22 +65,44 @@ if adata.shape[1] > 2000:
     adata = adata[:, adata.var['highly_variable']]
 
 train_adata, valid_adata = train_test_split(adata, 0.80)
-cell_type_adata = adata[adata.obs[cell_type_key] == specific_celltype]
-net_train_adata = train_adata[
-    ~((train_adata.obs[cell_type_key] == specific_celltype) & (train_adata.obs[condition_key].isin(target_conditions)))]
+if specific_celltype == 'all':
+    for specific_celltype in adata.obs[cell_type_key].unique().tolist():
+        cell_type_adata = adata[adata.obs[cell_type_key] == specific_celltype]
+        net_train_adata = train_adata[
+            ~((train_adata.obs[cell_type_key] == specific_celltype) & (train_adata.obs[condition_key].isin(target_conditions)))]
 
-model = SAUCIE(x_dimension=net_train_adata.shape[1], lambda_b=0.2, lambda_c=0.0, layer_c=0, lambda_d=0.0)
+        model = SAUCIE(x_dimension=net_train_adata.shape[1], lambda_b=0.2, lambda_c=0.0, layer_c=0, lambda_d=0.0)
 
-model.train(net_train_adata, condition_key=condition_key, le=labelencoder, n_epochs=1000, batch_size=256)
-labels = np.ones_like(adata.obs[condition_key].values)
-mmd_adata = model.to_latent(net_train_adata, labels)
+        model.train(net_train_adata, condition_key=condition_key, le=labelencoder, n_epochs=1000, batch_size=256)
+        labels = np.ones_like(adata.obs[condition_key].values)
+        mmd_adata = model.to_latent(net_train_adata, labels)
 
-pred_adata = model.predict(net_train_adata, labelencoder[target_condition], condition_key, cell_type_key,
-                           specific_celltype,
-                           source_condition, target_condition)
+        pred_adata = model.predict(net_train_adata, labelencoder[target_condition], condition_key, cell_type_key,
+                                   specific_celltype,
+                                   source_condition, target_condition)
 
-pred_adata.write_h5ad(f"./data/reconstructed/{data_name}/SAUCIE-{specific_celltype}.h5ad")
+        pred_adata.write_h5ad(f"/home/mohsen/data/trvae/reconstructed/{data_name}/SAUCIE-{specific_celltype}.h5ad")
 
-reptrvae.pl.plot_umap(mmd_adata,
-                      condition_key, cell_type_key,
-                      frameon=False, path_to_save=f"./results/{data_name}/", model_name="SAUCIE")
+        # reptrvae.pl.plot_umap(mmd_adata,
+        #                       condition_key, cell_type_key,
+        #                       frameon=False, path_to_save=f"./results/{data_name}/", model_name="SAUCIE")
+else:
+    cell_type_adata = adata[adata.obs[cell_type_key] == specific_celltype]
+    net_train_adata = train_adata[
+            ~((train_adata.obs[cell_type_key] == specific_celltype) & (train_adata.obs[condition_key].isin(target_conditions)))]
+
+    model = SAUCIE(x_dimension=net_train_adata.shape[1], lambda_b=0.2, lambda_c=0.0, layer_c=0, lambda_d=0.0)
+
+    model.train(net_train_adata, condition_key=condition_key, le=labelencoder, n_epochs=1000, batch_size=256)
+    labels = np.ones_like(adata.obs[condition_key].values)
+    mmd_adata = model.to_latent(net_train_adata, labels)
+
+    pred_adata = model.predict(net_train_adata, labelencoder[target_condition], condition_key, cell_type_key,
+                               specific_celltype,
+                               source_condition, target_condition)
+
+    pred_adata.write_h5ad(f"/home/mohsen/data/trvae/reconstructed/{data_name}/SAUCIE-{specific_celltype}.h5ad")
+
+    # reptrvae.pl.plot_umap(mmd_adata,
+    #                       condition_key, cell_type_key,
+    #                       frameon=False, path_to_save=f"./results/{data_name}/", model_name="SAUCIE")
