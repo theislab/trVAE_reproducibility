@@ -75,7 +75,7 @@ Figures  | notebook path
 | [*Method Comparison - Haber et. al*](https://nbviewer.jupyter.org/github/theislab/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/methodComparison-Haber.ipynb)| Jupyter Notebooks/methodComparison-Haber.ipynb| 
 | [*Method Comparison - Kang et. al*](https://nbviewer.jupyter.org/github/theislab/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/methodComparison-Kang.ipynb)| Jupyter Notebooks/methodComparison-Kang.ipynb| 
 | [*Runtime Comparison - Kang et. al*](https://nbviewer.jupyter.org/github/theislab/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/Time.ipynb)| Jupyter Notebooks/Time.ipynb|
-| [*Simulation Response - Kang et. al*](https://nbviewer.jupyter.org/github/theislab/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/BoxPlots_StackedViolins - Kang.ipynb)| Jupyter Notebooks/BoxPlots_StackedViolins - Kang.ipynb|
+| [*Simulation Response - Kang et. al*](https://nbviewer.jupyter.org/github/theislab/trVAE_reproducibility/blob/master/Jupyter%20Notebooks/BoxPlots_StackedViolins - Kang.ipynb)| Jupyter Notebooks/BoxPlots_StackedViolins%20-%20Kang.ipynb|
 
 To run the notebooks and scripts you need following packages :
 
